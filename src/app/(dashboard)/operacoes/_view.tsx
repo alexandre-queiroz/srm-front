@@ -70,7 +70,7 @@ const columns = [
 interface Props {
   initialData: Receivable[];
   productTypes: ProductType[];
-  fetchReceivables: (page: number, pageSize: number) => Promise<Receivable[]>;
+  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; assignor_id?: string }) => Promise<Receivable[]>;
   uploadXml: (formData: FormData) => Promise<ReceivableUploadResult>;
 }
 
@@ -78,6 +78,7 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
   const [data, setData] = useState(initialData);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const [isPending, startTransition] = useTransition();
 
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -94,13 +95,17 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
       : pageIndex * pageSize + data.length;
 
   const loadPage = useCallback(
-    (nextPage: number, nextSize: number) => {
+    (nextPage: number, nextSize: number, nextFilters: any = filters) => {
       startTransition(async () => {
-        const result = await fetchReceivables(nextPage + 1, nextSize);
+        const result = await fetchReceivables({
+          page: nextPage + 1,
+          pageSize: nextSize,
+          ...nextFilters,
+        });
         setData(result);
       });
     },
-    [fetchReceivables],
+    [fetchReceivables, filters],
   );
 
   const handlePageChange = (page: number) => {
@@ -112,6 +117,14 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
     setPageSize(size);
     setPageIndex(0);
     loadPage(0, size);
+  };
+
+  const handleFilterChange = (columnId: string, value: string) => {
+    const nextFilters = { ...filters, [columnId]: value };
+    if (!value) delete nextFilters[columnId];
+    setFilters(nextFilters);
+    setPageIndex(0);
+    loadPage(0, pageSize, nextFilters);
   };
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -176,7 +189,7 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
         pageIndex={pageIndex}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        onFilterChange={() => {}}
+        onFilterChange={handleFilterChange}
       />
 
       <Modal open={uploadOpen} onOpenChange={handleCloseUpload}>
