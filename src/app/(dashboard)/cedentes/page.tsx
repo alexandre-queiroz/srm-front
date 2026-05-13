@@ -4,10 +4,15 @@ import { listCompanies } from "@/repositories/company-repository";
 import type { Company } from "@/types";
 import { CedentesView } from "./_view";
 
-async function fetchCompanies(query?: string): Promise<Company[]> {
+async function fetchCompanies(params?: {
+  name?: string;
+  name_op?: string;
+  cnpj?: string;
+  cnpj_op?: string;
+}): Promise<Company[]> {
   "use server";
   const token = await getAuthToken();
-  return listCompanies(token, { query, limit: 100 });
+  return listCompanies(token, { ...params, limit: 100 });
 }
 
 export default async function CedentesPage() {

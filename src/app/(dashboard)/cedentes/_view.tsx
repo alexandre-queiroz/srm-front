@@ -7,67 +7,91 @@ import Button from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import Icon from "@/components/ui/icon";
 import type { Company } from "@/types";
-import { toast } from "sonner";
 
 const columns = [
-  { 
-    id: "name", 
-    header: "Nome", 
+  {
+    id: "name",
+    header: "Nome",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) => <span className="font-bold text-fg-1">{row.name}</span>
+    cell: ({ row }: { row: Company }) => <span className="font-bold text-fg-1">{row.name}</span>,
   },
-  { 
-    id: "cnpj", 
-    header: "CNPJ", 
+  {
+    id: "cnpj",
+    header: "CNPJ",
     enableColumnFilter: true,
     cell: ({ row }: { row: Company }) => (
       <span className="text-[11px] text-fg-3 font-mono">
         {row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
       </span>
-    )
+    ),
   },
-  { 
-    id: "created_at", 
+  {
+    id: "created_at",
     header: "Cadastrado em",
-    cell: ({ row }: { row: Company }) => 
-      new Date(row.created_at).toLocaleDateString("pt-BR")
+    cell: ({ row }: { row: Company }) => new Date(row.created_at).toLocaleDateString("pt-BR"),
   },
-  { 
-    id: "status", 
+  {
+    id: "status",
     header: "Status",
-    cell: () => <Badge color="success" size="sm" className="font-bold">ATIVO</Badge>
+    cell: () => (
+      <Badge color="success" size="sm" className="font-bold">
+        ATIVO
+      </Badge>
+    ),
   },
   {
     id: "actions",
     header: "Ações",
     cell: () => (
       <div className="flex items-center gap-1">
-        <button className="p-2 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer" title="Editar">
+        <button
+          className="p-2 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer"
+          title="Editar"
+        >
           <Icon name="edit" size={16} />
         </button>
       </div>
-    )
-  }
+    ),
+  },
 ];
 
 interface Props {
   initialData: Company[];
-  fetchCompanies: (query?: string) => Promise<Company[]>;
+  fetchCompanies: (params?: {
+    name?: string;
+    name_op?: string;
+    cnpj?: string;
+    cnpj_op?: string;
+  }) => Promise<Company[]>;
 }
 
 export function CedentesView({ initialData, fetchCompanies }: Props) {
   const [data, setData] = useState(initialData);
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
 
-  const handleRefresh = (query?: string) => {
+  const loadData = (nextFilters: Record<string, string>) => {
     startTransition(async () => {
-      try {
-        const result = await fetchCompanies(query);
-        setData(result);
-      } catch (err: any) {
-        toast.error("Erro ao carregar empresas.");
-      }
+      const result = await fetchCompanies({
+        name: nextFilters.name,
+        name_op: nextFilters.name_op,
+        cnpj: nextFilters.cnpj,
+        cnpj_op: nextFilters.cnpj_op,
+      });
+      setData(result);
     });
+  };
+
+  const handleFilterChange = (columnId: string, value: string, operator?: string) => {
+    const nextFilters = { ...filters, [columnId]: value };
+    if (!value) {
+      delete nextFilters[columnId];
+      delete nextFilters[`${columnId}_op`];
+    } else if (operator) {
+      nextFilters[`${columnId}_op`] = operator;
+    }
+    setFilters(nextFilters);
+    loadData(nextFilters);
   };
 
   return (
@@ -83,12 +107,12 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
         </motion.div>
 
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            color="neutral" 
-            className="h-9 px-4 text-xs font-bold" 
+          <Button
+            variant="outline"
+            color="neutral"
+            className="h-9 px-4 text-xs font-bold"
             icon="refresh-cw"
-            onClick={() => handleRefresh()}
+            onClick={() => loadData(filters)}
             isLoading={isPending}
           >
             Atualizar
@@ -99,17 +123,15 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
         </div>
       </div>
 
-      <DataTable 
-        columns={columns} 
-        data={data} 
-        totalItems={data.length} 
-        pageSize={data.length} 
-        pageIndex={0} 
-        onPageChange={() => {}} 
-        onPageSizeChange={() => {}} 
-        onFilterChange={(columnId, value) => {
-          if (columnId === 'name' || columnId === 'cnpj') handleRefresh(value);
-        }}
+      <DataTable
+        columns={columns}
+        data={data}
+        totalItems={data.length}
+        pageSize={data.length}
+        pageIndex={0}
+        onPageChange={() => {}}
+        onPageSizeChange={() => {}}
+        onFilterChange={handleFilterChange}
       />
     </div>
   );
