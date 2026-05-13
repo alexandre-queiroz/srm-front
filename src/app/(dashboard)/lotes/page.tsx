@@ -25,7 +25,7 @@ async function fetchBatches(params: {
 async function fetchCompanies(social_reason?: string): Promise<Company[]> {
   "use server";
   const token = await getAuthToken();
-  return listCompanies(token, { social_reason, limit: 200 });
+  return listCompanies(token, { social_reason, limit: 50 });
 }
 
 async function fetchReceivableCount(assignorId: string): Promise<number> {
@@ -74,15 +74,11 @@ async function queueBatchAction(batchId: string, expectedVersion: number): Promi
 }
 
 export default async function LotesPage() {
-  const [initialData, companies] = await Promise.all([
-    safeCall(() => fetchBatches({ page: 1, pageSize: 20 }), [] as Batch[]),
-    safeCall(() => fetchCompanies(), [] as Company[]),
-  ]);
+  const initialData = await safeCall(() => fetchBatches({ page: 1, pageSize: 20 }), [] as Batch[]);
 
   return (
     <LotesView
       initialData={initialData}
-      companies={companies}
       fetchBatches={fetchBatches}
       fetchBatchDetail={fetchBatchDetail}
       fetchCompanies={fetchCompanies}
