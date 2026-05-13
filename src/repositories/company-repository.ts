@@ -6,7 +6,7 @@ export async function listCompanies(
   params?: { query?: string; limit?: number },
 ): Promise<Company[]> {
   const qs = new URLSearchParams();
-  if (params?.query) qs.set("query", params.query);
+  if (params?.query) qs.set("q", params.query);
   if (params?.limit) qs.set("limit", String(params.limit));
 
   return apiFetchJson<Company[]>(`/v1/companies?${qs}`, {}, token);

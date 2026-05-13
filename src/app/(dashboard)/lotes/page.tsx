@@ -1,62 +1,67 @@
-"use client";
+import { getAuthToken } from "@/lib/server-auth";
+import { listBatches, getBatch, createBatch, previewBatch, queueBatch } from "@/repositories/batch-repository";
+import { listReceivables } from "@/repositories/receivable-repository";
+import { listCompanies } from "@/repositories/company-repository";
+import type { Batch, BatchDetail, Receivable, Company, BatchPreview } from "@/types";
+import { LotesView } from "./_view";
 
-import React from "react";
-import { motion } from "framer-motion";
-import Icon from "@/components/ui/icon";
-import Badge from "@/components/ui/badge";
-import Button from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
+async function fetchBatches(page: number, pageSize: number): Promise<Batch[]> {
+  "use server";
+  const token = await getAuthToken();
+  return listBatches(token, { page, page_size: pageSize });
+}
 
-const batchesData = [
-  { id: "LOT-001", description: "Lote de Duplicatas - Setor Têxtil", items: 24, totalValue: 850000, status: "Aprovado" },
-  { id: "LOT-002", description: "Lote Agronegócio - Milho", items: 12, totalValue: 1240000, status: "Em Análise" },
-  { id: "LOT-003", description: "Lote Serviços TI", items: 8, totalValue: 45000, status: "Pendente" },
-];
+async function fetchCompanies(query?: string): Promise<Company[]> {
+  "use server";
+  const token = await getAuthToken();
+  return listCompanies(token, { query, limit: 50 });
+}
 
-const columns = [
-  { id: "id", header: "ID", enableColumnFilter: true, cell: ({ row }: any) => <span className="font-bold text-brand-blue-600">{row.id}</span> },
-  { id: "description", header: "Descrição", enableColumnFilter: true },
-  { id: "items", header: "Qtd. Itens" },
-  { id: "totalValue", header: "Valor Total", cell: ({ row }: any) => `R$ ${row.totalValue.toLocaleString("pt-BR")}` },
-  { 
-    id: "status", 
-    header: "Status",
-    enableColumnFilter: true,
-    cell: ({ row }: any) => {
-      const colors: any = { "Aprovado": "success", "Em Análise": "warning", "Pendente": "neutral" };
-      return <Badge color={colors[row.status] || "neutral"} size="sm" className="font-bold">{row.status.toUpperCase()}</Badge>;
-    }
-  },
-  {
-    id: "actions",
-    header: "Ações",
-    cell: () => (
-      <div className="flex items-center gap-1">
-        <button className="p-2 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer">
-          <Icon name="edit" size={16} />
-        </button>
-        <button className="p-2 hover:bg-srm-danger-50 text-srm-danger-600 rounded-lg transition-colors cursor-pointer">
-          <Icon name="trash" size={16} />
-        </button>
-      </div>
-    )
-  }
-];
+async function fetchReceivablesByAssignor(assignorId: string, page: number, pageSize: number): Promise<Receivable[]> {
+  "use server";
+  const token = await getAuthToken();
+  return listReceivables(token, { assignor_id: assignorId, page, page_size: pageSize });
+}
 
-export default function LotesPage() {
+async function createBatchAndPreview(
+  assignorId: string,
+  receivableIds: string[],
+): Promise<{ batch: Batch; preview: BatchPreview }> {
+  "use server";
+  const token = await getAuthToken();
+  const batch = await createBatch(token, { assignor_id: assignorId, receivable_ids: receivableIds });
+  const preview = await previewBatch(token, batch.id);
+  return { batch, preview };
+}
+
+async function fetchBatchDetail(batchId: string): Promise<BatchDetail> {
+  "use server";
+  const token = await getAuthToken();
+  return getBatch(token, batchId);
+}
+
+async function queueBatchAction(batchId: string, expectedVersion: number): Promise<Batch> {
+  "use server";
+  const token = await getAuthToken();
+  return queueBatch(token, batchId, expectedVersion);
+}
+
+export default async function LotesPage() {
+  const [initialData, companies] = await Promise.all([
+    fetchBatches(1, 20),
+    fetchCompanies(),
+  ]);
+
   return (
-    <div className="h-full flex flex-col space-y-6">
-      <div className="flex items-end justify-between shrink-0">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Lotes</h1>
-          <p className="t-body !text-fg-3 mt-0.5">Gerencie os agrupamentos de recebíveis para operação.</p>
-        </motion.div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" color="neutral" className="h-9 px-4 text-xs font-bold" icon="download">Exportar</Button>
-          <Button className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10" icon="plus">Novo Lote</Button>
-        </div>
-      </div>
-      <DataTable columns={columns} data={batchesData} totalItems={batchesData.length} pageSize={10} pageIndex={0} onPageChange={() => {}} onPageSizeChange={() => {}} onFilterChange={() => {}} />
-    </div>
+    <LotesView
+      initialData={initialData}
+      companies={companies}
+      fetchBatches={fetchBatches}
+      fetchBatchDetail={fetchBatchDetail}
+      fetchCompanies={fetchCompanies}
+      fetchReceivablesByAssignor={fetchReceivablesByAssignor}
+      createBatchAndPreview={createBatchAndPreview}
+      queueBatchAction={queueBatchAction}
+    />
   );
 }

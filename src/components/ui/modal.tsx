@@ -1,18 +1,21 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import Icon from "./icon";
 
 interface ModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  size?: "md" | "lg" | "xl" | "2xl";
 }
 
-export function Modal({ open, onOpenChange, children }: ModalProps) {
+const sizeClasses = { md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl", "2xl": "max-w-6xl" };
+
+export function Modal({ open, onOpenChange, children, size = "md" }: ModalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -52,19 +55,17 @@ export function Modal({ open, onOpenChange, children }: ModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 z-50 bg-brand-blue-900/20 backdrop-blur-md bg-gradient-to-br from-brand-blue-500/10 to-transparent"
+            className="bg-brand-blue-900/20 from-brand-blue-500/10 fixed inset-0 z-50 bg-gradient-to-br to-transparent backdrop-blur-md"
             onClick={() => onOpenChange(false)}
             aria-hidden="true"
           />
 
           {/* Modal Content Wrapper */}
-          <div className="relative z-50 w-full max-w-lg">
-            {children}
-          </div>
+          <div className={cn("relative z-50 w-full", sizeClasses[size])}>{children}</div>
         </div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }
 
@@ -79,15 +80,15 @@ export const ModalContent = React.forwardRef<
     exit={{ opacity: 0, scale: 0.96, y: 16 }}
     transition={{ type: "spring", bounce: 0, duration: 0.4 }}
     className={cn(
-      "relative flex w-full flex-col overflow-hidden rounded-2xl bg-white border-[0.5px] border-border-default shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)]",
-      className
+      "border-border-default relative flex w-full flex-col overflow-hidden rounded-2xl border-[0.5px] bg-white shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)]",
+      className,
     )}
     {...props}
   >
     {onClose && (
       <button
         onClick={onClose}
-        className="absolute right-5 top-5 rounded-full p-1.5 cursor-pointer text-srm-danger-500 transition-colors hover:bg-srm-danger-50 hover:text-srm-danger-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-srm-danger-500"
+        className="text-srm-danger-500 hover:bg-srm-danger-50 hover:text-srm-danger-600 focus-visible:ring-srm-danger-500 absolute top-5 right-5 cursor-pointer rounded-full p-1.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         <Icon name="x" size={18} stroke={2.5} />
       </button>
@@ -103,16 +104,16 @@ export const ModalHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDi
 ModalHeader.displayName = "ModalHeader";
 
 export const ModalTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h2 className={cn("text-xl font-semibold tracking-tight text-fg-1", className)} {...props} />
+  <h2 className={cn("text-fg-1 text-xl font-semibold tracking-tight", className)} {...props} />
 );
 ModalTitle.displayName = "ModalTitle";
 
 export const ModalDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
-  <p className={cn("text-sm text-fg-3", className)} {...props} />
+  <p className={cn("text-fg-3 text-sm", className)} {...props} />
 );
 ModalDescription.displayName = "ModalDescription";
 
 export const ModalFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex items-center justify-end gap-3 border-t border-border-subtle bg-surface-alt/30 p-6", className)} {...props} />
+  <div className={cn("border-border-subtle bg-surface-alt/30 flex items-center justify-end gap-3 border-t p-4", className)} {...props} />
 );
 ModalFooter.displayName = "ModalFooter";

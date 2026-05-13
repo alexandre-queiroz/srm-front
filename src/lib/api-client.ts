@@ -30,7 +30,8 @@ export async function apiFetch(
   const url = resolveApiUrl(path);
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    // Don't set Content-Type for FormData — fetch sets it automatically with the boundary
+    ...(!(options.body instanceof FormData) && { "Content-Type": "application/json" }),
     ...(options.headers as Record<string, string>),
   };
 

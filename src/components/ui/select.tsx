@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Icon from "./icon";
 
 export interface SelectOption {
@@ -37,17 +38,42 @@ export default function Select({
   color = "brand",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    if (!isOpen) return;
+
+    function handleClose(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    function handleScroll() {
+      setIsOpen(false);
+    }
+
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleClose);
+      window.addEventListener("scroll", handleScroll, true);
+    }, 10);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleClose);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [isOpen]);
+
+  const handleToggle = () => {
+    if (disabled) return;
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+    setIsOpen((prev) => !prev);
+  };
 
   const colorBorders = {
     brand: "border-brand-blue-500",
@@ -68,13 +94,16 @@ export default function Select({
 
   return (
     <div className={`flex w-full flex-col ${className}`} ref={containerRef}>
-      <div className="mb-1 min-h-[20px]">{label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}</div>
+      <div className="mb-1 min-h-[20px]">
+        {label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}
+      </div>
 
       <div className="relative">
         <button
+          ref={buttonRef}
           type="button"
           disabled={disabled}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={handleToggle}
           className={cn(
             "flex h-10 w-full items-center justify-between overflow-hidden rounded-full px-4 transition-colors duration-200",
             disabled ? "bg-surface-sunken text-fg-disabled cursor-not-allowed opacity-60" : "text-fg-1 cursor-pointer bg-white",
@@ -89,32 +118,37 @@ export default function Select({
           </div>
           <Icon name="chevronDown" size={15} stroke={2} className={cn("text-fg-3 shrink-0 ml-2 transition-transform", isOpen && "rotate-180")} />
         </button>
-
-        {isOpen && !disabled && (
-          <div className="border-border-subtle absolute z-50 mt-1 max-h-60 w-full overflow-auto overflow-x-hidden rounded-2xl border-[0.5px] bg-white shadow-lg flex flex-col">
-            {options.length === 0 ? (
-              <div className="text-fg-3 px-4 py-3 text-sm">Nenhuma opção</div>
-            ) : (
-              options.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={cn(
-                    "hover:bg-surface-alt w-full px-4 py-2.5 text-left text-sm transition-colors",
-                    value === opt.value ? "bg-surface-alt text-brand-blue-600 font-medium" : "text-fg-1",
-                  )}
-                  onClick={() => {
-                    onChange?.(opt.value);
-                    setIsOpen(false);
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))
-            )}
-          </div>
-        )}
       </div>
+
+      {isOpen && !disabled && typeof window !== "undefined" && createPortal(
+        <div
+          className="fixed z-[9999] max-h-60 overflow-auto overflow-x-hidden rounded-2xl border-[0.5px] border-border-subtle bg-white shadow-lg flex flex-col"
+          style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {options.length === 0 ? (
+            <div className="text-fg-3 px-4 py-3 text-sm">Nenhuma opção</div>
+          ) : (
+            options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={cn(
+                  "hover:bg-surface-alt w-full px-4 py-2.5 text-left text-sm transition-colors",
+                  value === opt.value ? "bg-surface-alt text-brand-blue-600 font-medium" : "text-fg-1",
+                )}
+                onClick={() => {
+                  onChange?.(opt.value);
+                  setIsOpen(false);
+                }}
+              >
+                {opt.label}
+              </button>
+            ))
+          )}
+        </div>,
+        document.body,
+      )}
 
       <div className="mt-1 min-h-[18px]">
         {error ? (
