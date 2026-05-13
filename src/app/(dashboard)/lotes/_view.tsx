@@ -136,11 +136,12 @@ type WizardStep = "assignor" | "receivables" | "preview" | "success";
 interface Props {
   initialData: Batch[];
   companies: Company[];
-  fetchBatches: (page: number, pageSize: number) => Promise<Batch[]>;
+  fetchBatches: (params: { page: number; pageSize: number; status?: string; assignor_id?: string }) => Promise<Batch[]>;
   fetchBatchDetail: (batchId: string) => Promise<BatchDetail>;
   fetchCompanies: (query?: string) => Promise<Company[]>;
   fetchReceivablesByAssignor: (assignorId: string, page: number, pageSize: number) => Promise<Receivable[]>;
-  createBatchAndPreview: (assignorId: string, receivableIds: string[]) => Promise<{ batch: Batch; preview: BatchPreview }>;
+  simulateBatch: (assignorId: string, receivableIds: string[]) => Promise<BatchPreview>;
+  createAndQueueBatch: (assignorId: string, receivableIds: string[]) => Promise<Batch>;
   queueBatchAction: (batchId: string, expectedVersion: number) => Promise<Batch>;
 }
 
@@ -151,7 +152,8 @@ export function LotesView({
   fetchBatchDetail,
   fetchCompanies,
   fetchReceivablesByAssignor,
-  createBatchAndPreview,
+  simulateBatch,
+  createAndQueueBatch,
   queueBatchAction,
 }: Props) {
   const [data, setData] = useState(initialData);
@@ -167,7 +169,6 @@ export function LotesView({
   const [selectedReceivableIds, setSelectedReceivableIds] = useState<Set<string>>(new Set());
   const [isLoadingReceivables, setIsLoadingReceivables] = useState(false);
 
-  const [createdBatch, setCreatedBatch] = useState<Batch | null>(null);
   const [preview, setPreview] = useState<BatchPreview | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isQueuing, setIsQueuing] = useState(false);
@@ -216,7 +217,7 @@ export function LotesView({
   const loadPage = useCallback(
     (nextPage: number, nextSize: number) => {
       startTransition(async () => {
-        const result = await fetchBatches(nextPage + 1, nextSize);
+        const result = await fetchBatches({ page: nextPage + 1, pageSize: nextSize });
         setData(result);
       });
     },
@@ -239,7 +240,6 @@ export function LotesView({
     setSelectedAssignorId("");
     setAvailableReceivables([]);
     setSelectedReceivableIds(new Set());
-    setCreatedBatch(null);
     setPreview(null);
   };
 
@@ -284,12 +284,11 @@ export function LotesView({
     if (selectedReceivableIds.size === 0) return;
     setIsCreating(true);
     try {
-      const { batch, preview } = await createBatchAndPreview(
+      const result = await simulateBatch(
         selectedAssignorId,
         Array.from(selectedReceivableIds),
       );
-      setCreatedBatch(batch);
-      setPreview(preview);
+      setPreview(result);
       setStep("preview");
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao simular lote.");
@@ -299,10 +298,10 @@ export function LotesView({
   };
 
   const handleQueue = async () => {
-    if (!createdBatch) return;
+    if (selectedReceivableIds.size === 0) return;
     setIsQueuing(true);
     try {
-      await queueBatchAction(createdBatch.id, createdBatch.version);
+      await createAndQueueBatch(selectedAssignorId, Array.from(selectedReceivableIds));
       setStep("success");
       loadPage(0, pageSize);
       setPageIndex(0);
