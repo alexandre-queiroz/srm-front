@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useCallback, useTransition, useRef, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useTransition, useEffect } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import Badge from "@/components/ui/badge";
@@ -77,7 +78,7 @@ const WIZARD_STEPS: { id: WizardStep; label: string }[] = [
 function WizardStepper({ step }: { step: WizardStep }) {
   const currentIndex = WIZARD_STEPS.findIndex((s) => s.id === step);
   return (
-    <div className="flex items-center px-6 pt-5 pb-1">
+    <div className="flex items-center px-6 pt-14 pb-1">
       {WIZARD_STEPS.map((s, i) => {
         const done = i < currentIndex;
         const active = i === currentIndex;
@@ -199,7 +200,6 @@ const batchColumns = [
 
 interface Props {
   initialData: Batch[];
-  companies: Company[];
   fetchBatches: (params: { page: number; pageSize: number; status?: string; assignor_id?: string }) => Promise<Batch[]>;
   fetchBatchDetail: (batchId: string) => Promise<BatchDetail>;
   fetchCompanies: (query?: string) => Promise<Company[]>;
@@ -214,9 +214,9 @@ interface Props {
 
 export function LotesView({
   initialData,
-  companies,
   fetchBatches,
   fetchBatchDetail,
+  fetchCompanies,
   fetchReceivablesByAssignor,
   fetchReceivableCount,
   simulateBatch,
@@ -232,6 +232,8 @@ export function LotesView({
   const [wizardOpen, setWizardOpen] = useState(false);
   const [step, setStep] = useState<WizardStep>("assignor");
   const [assignorSearch, setAssignorSearch] = useState("");
+  const [searchResults, setSearchResults] = useState<Company[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedAssignorId, setSelectedAssignorId] = useState("");
   const [availableReceivables, setAvailableReceivables] = useState<Receivable[]>([]);
   const [selectedReceivableIds, setSelectedReceivableIds] = useState<Set<string>>(new Set());
@@ -246,17 +248,22 @@ export function LotesView({
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isQueuingDetail, setIsQueuingDetail] = useState(false);
 
-  // Filtered companies from local search
-  const filteredCompanies = useMemo(() => {
-    if (!assignorSearch.trim()) return companies;
-    const q = assignorSearch.toLowerCase();
-    return companies.filter(
-      (c) =>
-        c.social_reason.toLowerCase().includes(q) ||
-        (c.fantasy_name ?? "").toLowerCase().includes(q) ||
-        c.cnpj.includes(q.replace(/\D/g, "")),
-    );
-  }, [companies, assignorSearch]);
+  // Server-side search com debounce
+  const debouncedSearch = useDebounce(assignorSearch, 350);
+
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    let cancelled = false;
+    setIsSearching(true);
+    fetchCompanies(debouncedSearch)
+      .then((res) => { if (!cancelled) setSearchResults(res); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setIsSearching(false); });
+    return () => { cancelled = true; };
+  }, [debouncedSearch, fetchCompanies]);
 
   const fmtBRL = (v: string | number) =>
     `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -318,6 +325,7 @@ export function LotesView({
   const resetWizard = () => {
     setStep("assignor");
     setAssignorSearch("");
+    setSearchResults([]);
     setSelectedAssignorId("");
     setAvailableReceivables([]);
     setSelectedReceivableIds(new Set());
@@ -597,10 +605,19 @@ export function LotesView({
 
               {/* Company list */}
               <div className="px-6 pb-3 space-y-2 max-h-[340px] overflow-y-auto">
-                {filteredCompanies.length === 0 ? (
+                {!assignorSearch.trim() ? (
+                  <div className="flex flex-col items-center gap-2 py-8 text-center">
+                    <Icon name="search" size={20} className="text-fg-disabled" />
+                    <p className="text-sm text-fg-3">Digite o nome ou CNPJ para buscar cedentes.</p>
+                  </div>
+                ) : isSearching ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="w-5 h-5 rounded-full border-2 border-border-default border-t-brand-blue-400 animate-spin" />
+                  </div>
+                ) : searchResults.length === 0 ? (
                   <p className="text-sm text-fg-3 text-center py-6">Nenhuma empresa encontrada.</p>
                 ) : (
-                  filteredCompanies.map((company) => (
+                  searchResults.map((company) => (
                     <AssignorCard
                       key={company.id}
                       company={company}
