@@ -18,7 +18,7 @@ const menuGroups = [
   {
     title: "Operacional",
     items: [
-      { icon: "trending-up", label: "Operações", href: "/operacoes" },
+      { icon: "trending-up", label: "Recebíveis", href: "/operacoes" },
       { icon: "layers", label: "Lotes", href: "/lotes" },
       { icon: "user", label: "Empresas", href: "/cedentes" },
       { icon: "file-text", label: "Relatórios", href: "/relatorios" },
@@ -34,9 +34,19 @@ const menuGroups = [
   }
 ];
 
+import { useRouter } from "next/navigation";
+import { logoutAction } from "@/lib/auth-actions";
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logoutAction();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <div className="flex h-screen bg-surface-alt overflow-hidden">
@@ -160,7 +170,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
               <Avatar name="Alexandre Queiroz" size="sm" />
               <button 
-                onClick={() => window.location.href = '/login'}
+                onClick={handleLogout}
                 className="ml-2 w-9 h-9 rounded-lg bg-srm-danger-50 text-srm-danger-600 hover:bg-srm-danger-100 transition-all flex items-center justify-center border border-srm-danger-100 cursor-pointer"
                 title="Sair do sistema"
               >

@@ -8,16 +8,35 @@ import Icon from "@/components/ui/icon";
 import Badge from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { loginAction } from "@/lib/auth-actions";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1500);
+    
+    try {
+      const result = await loginAction({ email, password });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      toast.success("Login realizado com sucesso!");
+      router.push("/");
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Ocorreu um erro inesperado");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -94,6 +113,8 @@ export default function LoginPage() {
                 placeholder="Digite seu e-mail" 
                 type="email" 
                 icon="user"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
               <div className="space-y-1">
@@ -102,6 +123,8 @@ export default function LoginPage() {
                   placeholder="••••••••" 
                   type="password" 
                   icon="lock"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
                 <div className="flex justify-end">
