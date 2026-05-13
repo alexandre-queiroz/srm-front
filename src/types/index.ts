@@ -32,6 +32,8 @@ export interface BatchPreviewItem {
   currency_code: string;
   term_days: number;
   present_value: string;
+  base_rate_annual: string;
+  spread_annual: string;
 }
 
 export interface Batch {

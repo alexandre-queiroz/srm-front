@@ -24,6 +24,7 @@ interface DataTableProps<TData> {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onFilterChange: (columnId: string, value: string, operator?: string) => void;
+  onRowClick?: (row: TData) => void;
   minWidth?: string;
 }
 
@@ -151,6 +152,7 @@ export function DataTable<TData>({
   onPageChange,
   onPageSizeChange,
   onFilterChange,
+  onRowClick,
   minWidth = "w-full",
 }: DataTableProps<TData>) {
   const pageCount = Math.ceil(totalItems / pageSize) || 1;
@@ -199,7 +201,11 @@ export function DataTable<TData>({
                 </TableRow>
               ) : (
                 data.map((row, i) => (
-                  <TableRow key={i}>
+                  <TableRow
+                    key={i}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    className={onRowClick ? "cursor-pointer" : undefined}
+                  >
                     {columns.map((col) => (
                       <TableCell key={col.id} className="px-5 py-4 text-[13px] text-fg-1 whitespace-nowrap">
                         {col.cell ? col.cell({ row }) : (row as any)[col.id]}
