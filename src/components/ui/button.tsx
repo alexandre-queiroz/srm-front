@@ -1,13 +1,15 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 import Icon from "./icon";
+import Link from "next/link";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "solid" | "outline" | "ghost" | "soft" | "link";
+  variant?: "solid" | "outline" | "ghost" | "soft" | "link" | "secondary";
   color?: "brand" | "accent" | "neutral" | "danger" | "success" | "warning";
   size?: "sm" | "md" | "lg";
   icon?: string;
   iconRight?: string;
+  href?: string;
   isLoading?: boolean;
   children: React.ReactNode;
 }
@@ -18,13 +20,14 @@ export default function Button({
   size = "md",
   icon,
   iconRight,
+  href,
   isLoading,
   children,
   className = "",
   disabled,
   ...props
 }: ButtonProps) {
-  const variantColorStyles = {
+  const variantColorStyles: any = {
     solid: {
       brand: "bg-brand-blue-500 text-white border border-transparent shadow-brand hover:bg-brand-blue-600 active:bg-brand-blue-700",
       accent:
@@ -36,6 +39,14 @@ export default function Button({
     },
     outline: {
       brand: "bg-transparent text-brand-blue-500 border border-brand-blue-500 hover:bg-brand-blue-50 active:bg-brand-blue-100",
+      accent: "bg-transparent text-brand-orange-500 border border-brand-orange-500 hover:bg-brand-orange-50 active:bg-brand-orange-100",
+      neutral: "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
+      danger: "bg-transparent text-srm-danger-500 border border-srm-danger-500 hover:bg-srm-danger-50 active:bg-srm-danger-100",
+      success: "bg-transparent text-srm-success-500 border border-srm-success-500 hover:bg-srm-success-50 active:bg-srm-success-100",
+      warning: "bg-transparent text-srm-warning-500 border border-srm-warning-500 hover:bg-srm-warning-50 active:bg-srm-warning-100",
+    },
+    secondary: {
+      brand: "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
       accent: "bg-transparent text-brand-orange-500 border border-brand-orange-500 hover:bg-brand-orange-50 active:bg-brand-orange-100",
       neutral: "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
       danger: "bg-transparent text-srm-danger-500 border border-srm-danger-500 hover:bg-srm-danger-50 active:bg-srm-danger-100",
@@ -81,15 +92,40 @@ export default function Button({
 
   const iconSize = { sm: 13, md: 15, lg: 16 };
 
+  // Safety check for styles
+  const currentVariantStyles = variantColorStyles[variant] || variantColorStyles.solid;
+  const currentStyles = currentVariantStyles[color] || currentVariantStyles.brand;
+
   const buttonClasses = cn(
-    "inline-flex items-center justify-center rounded-full font-medium cursor-pointer",
-    "transition-all duration-[160ms] ease-[cubic-bezier(0.2,0,0,1)]",
+    "inline-flex items-center justify-center rounded-full font-medium cursor-pointer transition-all duration-200",
     "disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none",
     "hover:-translate-y-px active:translate-y-0",
-    variantColorStyles[variant][color],
-    sizeStyles[size],
-    className,
+    currentStyles,
+    sizeStyles[size] || sizeStyles.md,
+    className
   );
+
+  const content = (
+    <>
+      {isLoading ? (
+        <Icon name="loader2" size={iconSize[size] || 15} className="animate-spin" />
+      ) : (
+        <>
+          {icon && <Icon name={icon} size={iconSize[size] || 15} stroke={1.8} />}
+          {children}
+          {iconRight && <Icon name={iconRight} size={iconSize[size] || 15} stroke={1.8} />}
+        </>
+      )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={buttonClasses}>
+        {content}
+      </Link>
+    );
+  }
 
   return (
     <button 
@@ -97,15 +133,7 @@ export default function Button({
       disabled={disabled || isLoading} 
       className={buttonClasses}
     >
-      {isLoading ? (
-        <Icon name="loader2" size={iconSize[size]} className="animate-spin" />
-      ) : (
-        <>
-          {icon && <Icon name={icon} size={iconSize[size]} stroke={1.8} />}
-          {children}
-          {iconRight && <Icon name={iconRight} size={iconSize[size]} stroke={1.8} />}
-        </>
-      )}
+      {content}
     </button>
   );
 }
