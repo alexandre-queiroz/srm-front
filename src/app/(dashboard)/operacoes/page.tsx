@@ -2,7 +2,8 @@ import { getAuthToken } from "@/lib/server-auth";
 import { safeCall } from "@/lib/safe-call";
 import { listReceivables, uploadReceivableXml } from "@/repositories/receivable-repository";
 import { listProductTypes } from "@/repositories/product-type-repository";
-import type { Receivable, ProductType, ReceivableUploadResult } from "@/types";
+import { listCurrencies } from "@/repositories/currency-repository";
+import type { Receivable, ProductType, ReceivableUploadResult, Currency } from "@/types";
 import { OperacoesView } from "./_view";
 
 async function fetchReceivables(params: {
@@ -31,6 +32,12 @@ async function fetchProductTypes(): Promise<ProductType[]> {
   return listProductTypes(token);
 }
 
+async function fetchCurrencies(): Promise<Currency[]> {
+  "use server";
+  const token = await getAuthToken();
+  return listCurrencies(token, { active_only: true });
+}
+
 async function uploadXml(formData: FormData): Promise<ReceivableUploadResult> {
   "use server";
   const token = await getAuthToken();
@@ -44,15 +51,17 @@ async function uploadXml(formData: FormData): Promise<ReceivableUploadResult> {
 }
 
 export default async function OperacoesPage() {
-  const [initialData, productTypes] = await Promise.all([
+  const [initialData, productTypes, currencies] = await Promise.all([
     safeCall(() => fetchReceivables({ page: 1, pageSize: 20 }), [] as Receivable[]),
     safeCall(() => fetchProductTypes(), [] as ProductType[]),
+    safeCall(() => fetchCurrencies(), [] as Currency[]),
   ]);
 
   return (
     <OperacoesView
       initialData={initialData}
       productTypes={productTypes}
+      currencies={currencies}
       fetchReceivables={fetchReceivables}
       uploadXml={uploadXml}
     />

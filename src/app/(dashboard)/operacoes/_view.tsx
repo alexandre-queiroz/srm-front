@@ -9,7 +9,7 @@ import { DataTable } from "@/components/ui/data-table";
 import Icon from "@/components/ui/icon";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from "@/components/ui/modal";
 import Select from "@/components/ui/select";
-import type { Receivable, ProductType, ReceivableUploadResult } from "@/types";
+import type { Receivable, ProductType, ReceivableUploadResult, Currency } from "@/types";
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "danger" | "neutral"> = {
   available: "success",
@@ -68,11 +68,12 @@ const columns = [
 interface Props {
   initialData: Receivable[];
   productTypes: ProductType[];
+  currencies: Currency[];
   fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; invoice_key_op?: string; assignor_id?: string }) => Promise<Receivable[]>;
   uploadXml: (formData: FormData) => Promise<ReceivableUploadResult>;
 }
 
-export function OperacoesView({ initialData, productTypes, fetchReceivables, uploadXml }: Props) {
+export function OperacoesView({ initialData, productTypes, currencies, fetchReceivables, uploadXml }: Props) {
   const [data, setData] = useState(initialData);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -164,9 +165,7 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
 
   const productTypeOptions = productTypes.map((p) => ({ value: p.id, label: p.name }));
 
-  const currencyOptions = Array.from(
-    new Set(["BRL", ...initialData.map((r) => r.currency_code)]),
-  ).map((code) => ({ value: code, label: code }));
+  const currencyOptions = currencies.map((c) => ({ value: c.code, label: `${c.code} — ${c.name}` }));
 
   return (
     <div className="h-full flex flex-col gap-6">
