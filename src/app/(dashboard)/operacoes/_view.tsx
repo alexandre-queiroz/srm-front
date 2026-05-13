@@ -13,14 +13,14 @@ import type { Receivable, ProductType, ReceivableUploadResult, Currency, Page } 
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "danger" | "neutral"> = {
   available: "success",
-  batched: "warning",
-  settled: "neutral",
+  anticipated: "neutral",
+  invalid: "danger",
 };
 
 const STATUS_LABEL: Record<string, string> = {
   available: "Disponível",
-  batched: "Em Lote",
-  settled: "Liquidado",
+  anticipated: "Antecipado",
+  invalid: "Inválido",
 };
 
 const columns = [
