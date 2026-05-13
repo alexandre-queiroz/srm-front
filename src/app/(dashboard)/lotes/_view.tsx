@@ -107,26 +107,9 @@ function WizardStepper({ step }: { step: WizardStep }) {
 
 // ─── Assignor card ────────────────────────────────────────────────────────────
 
-function AssignorCard({
-  company,
-  selected,
-  onClick,
-  fetchCount,
-}: {
-  company: Company;
-  selected: boolean;
-  onClick: () => void;
-  fetchCount: (id: string) => Promise<number>;
-}) {
-  const [count, setCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchCount(company.id).then((n) => { if (!cancelled) setCount(n); }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [company.id, fetchCount]);
-
+function AssignorCard({ company, selected, onClick }: { company: Company; selected: boolean; onClick: () => void }) {
   const cnpj = company.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+  const count = company.available_receivables_count;
 
   return (
     <button
@@ -147,13 +130,9 @@ function AssignorCard({
         <p className="text-xs text-fg-3 mt-0.5">{cnpj}</p>
       </div>
       <div className="ml-4 shrink-0">
-        {count === null ? (
-          <div className="w-5 h-5 rounded-full border-2 border-border-default border-t-brand-blue-400 animate-spin" />
-        ) : (
-          <Badge color={count > 0 ? "brand" : "neutral"} size="sm">
-            {count} {count === 1 ? "título" : "títulos"}
-          </Badge>
-        )}
+        <Badge color={count > 0 ? "brand" : "neutral"} size="sm">
+          {count} {count === 1 ? "título" : "títulos"}
+        </Badge>
       </div>
     </button>
   );
@@ -204,7 +183,6 @@ interface Props {
   fetchBatchDetail: (batchId: string) => Promise<BatchDetail>;
   fetchCompanies: (query?: string) => Promise<Company[]>;
   fetchReceivablesByAssignor: (assignorId: string, page: number, pageSize: number) => Promise<Receivable[]>;
-  fetchReceivableCount: (assignorId: string) => Promise<number>;
   simulateBatch: (assignorId: string, receivableIds: string[]) => Promise<BatchPreview>;
   createAndQueueBatch: (assignorId: string, receivableIds: string[]) => Promise<Batch>;
   queueBatchAction: (batchId: string, expectedVersion: number) => Promise<Batch>;
@@ -218,7 +196,6 @@ export function LotesView({
   fetchBatchDetail,
   fetchCompanies,
   fetchReceivablesByAssignor,
-  fetchReceivableCount,
   simulateBatch,
   createAndQueueBatch,
   queueBatchAction,
@@ -623,7 +600,6 @@ export function LotesView({
                       company={company}
                       selected={selectedAssignorId === company.id}
                       onClick={() => setSelectedAssignorId(company.id)}
-                      fetchCount={fetchReceivableCount}
                     />
                   ))
                 )}

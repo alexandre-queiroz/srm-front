@@ -28,12 +28,6 @@ async function fetchCompanies(social_reason?: string): Promise<Company[]> {
   return listCompanies(token, { social_reason, limit: 50 });
 }
 
-async function fetchReceivableCount(assignorId: string): Promise<number> {
-  "use server";
-  const token = await getAuthToken();
-  const result = await listReceivables(token, { assignor_id: assignorId, status: "available", page: 1, page_size: 1 });
-  return result.total;
-}
 
 async function fetchReceivablesByAssignor(assignorId: string, page: number, pageSize: number): Promise<Receivable[]> {
   "use server";
@@ -83,7 +77,6 @@ export default async function LotesPage() {
       fetchBatchDetail={fetchBatchDetail}
       fetchCompanies={fetchCompanies}
       fetchReceivablesByAssignor={fetchReceivablesByAssignor}
-      fetchReceivableCount={fetchReceivableCount}
       simulateBatch={simulateBatchAction}
       createAndQueueBatch={createAndQueueBatchAction}
       queueBatchAction={queueBatchAction}

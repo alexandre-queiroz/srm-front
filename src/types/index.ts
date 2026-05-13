@@ -4,6 +4,7 @@ export interface Company {
   social_reason: string;
   fantasy_name: string | null;
   created_at: string;
+  available_receivables_count: number;
 }
 
 export interface Currency {
