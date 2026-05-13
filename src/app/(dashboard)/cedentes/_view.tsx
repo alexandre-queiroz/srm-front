@@ -1,0 +1,116 @@
+"use client";
+
+import React, { useState, useTransition } from "react";
+import { motion } from "framer-motion";
+import Badge from "@/components/ui/badge";
+import Button from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
+import Icon from "@/components/ui/icon";
+import type { Company } from "@/types";
+import { toast } from "sonner";
+
+const columns = [
+  { 
+    id: "name", 
+    header: "Nome", 
+    enableColumnFilter: true,
+    cell: ({ row }: { row: Company }) => <span className="font-bold text-fg-1">{row.name}</span>
+  },
+  { 
+    id: "cnpj", 
+    header: "CNPJ", 
+    enableColumnFilter: true,
+    cell: ({ row }: { row: Company }) => (
+      <span className="text-[11px] text-fg-3 font-mono">
+        {row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
+      </span>
+    )
+  },
+  { 
+    id: "created_at", 
+    header: "Cadastrado em",
+    cell: ({ row }: { row: Company }) => 
+      new Date(row.created_at).toLocaleDateString("pt-BR")
+  },
+  { 
+    id: "status", 
+    header: "Status",
+    cell: () => <Badge color="success" size="sm" className="font-bold">ATIVO</Badge>
+  },
+  {
+    id: "actions",
+    header: "Ações",
+    cell: () => (
+      <div className="flex items-center gap-1">
+        <button className="p-2 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer" title="Editar">
+          <Icon name="edit" size={16} />
+        </button>
+      </div>
+    )
+  }
+];
+
+interface Props {
+  initialData: Company[];
+  fetchCompanies: (query?: string) => Promise<Company[]>;
+}
+
+export function CedentesView({ initialData, fetchCompanies }: Props) {
+  const [data, setData] = useState(initialData);
+  const [isPending, startTransition] = useTransition();
+
+  const handleRefresh = (query?: string) => {
+    startTransition(async () => {
+      try {
+        const result = await fetchCompanies(query);
+        setData(result);
+      } catch (err: any) {
+        toast.error("Erro ao carregar empresas.");
+      }
+    });
+  };
+
+  return (
+    <div className="h-full flex flex-col space-y-6">
+      <div className="flex items-end justify-between shrink-0">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Empresas</h1>
+          <p className="t-body !text-fg-3 mt-0.5">Gestão de cedentes e sacados cadastrados no sistema.</p>
+        </motion.div>
+
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            color="neutral" 
+            className="h-9 px-4 text-xs font-bold" 
+            icon="refresh-cw"
+            onClick={() => handleRefresh()}
+            isLoading={isPending}
+          >
+            Atualizar
+          </Button>
+          <Button className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10" icon="plus">
+            Cadastrar
+          </Button>
+        </div>
+      </div>
+
+      <DataTable 
+        columns={columns} 
+        data={data} 
+        totalItems={data.length} 
+        pageSize={data.length} 
+        pageIndex={0} 
+        onPageChange={() => {}} 
+        onPageSizeChange={() => {}} 
+        onFilterChange={(columnId, value) => {
+          if (columnId === 'name' || columnId === 'cnpj') handleRefresh(value);
+        }}
+      />
+    </div>
+  );
+}
