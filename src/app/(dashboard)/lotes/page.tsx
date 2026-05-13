@@ -31,7 +31,8 @@ async function fetchCompanies(social_reason?: string): Promise<Company[]> {
 async function fetchReceivablesByAssignor(assignorId: string, page: number, pageSize: number): Promise<Receivable[]> {
   "use server";
   const token = await getAuthToken();
-  return listReceivables(token, { assignor_id: assignorId, page, page_size: pageSize });
+  const result = await listReceivables(token, { assignor_id: assignorId, page, page_size: pageSize });
+  return result.items;
 }
 
 async function simulateBatchAction(

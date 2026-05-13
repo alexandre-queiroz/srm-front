@@ -119,6 +119,14 @@ export interface CursorPage<T> {
   next_cursor: string | null;
 }
 
+export interface Page<T> {
+  items: T[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+}
+
 export interface ApiError {
   detail: string;
 }

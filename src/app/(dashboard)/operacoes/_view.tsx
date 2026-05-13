@@ -9,7 +9,7 @@ import { DataTable } from "@/components/ui/data-table";
 import Icon from "@/components/ui/icon";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from "@/components/ui/modal";
 import Select from "@/components/ui/select";
-import type { Receivable, ProductType, ReceivableUploadResult, Currency } from "@/types";
+import type { Receivable, ProductType, ReceivableUploadResult, Currency, Page } from "@/types";
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "danger" | "neutral"> = {
   available: "success",
@@ -67,14 +67,16 @@ const columns = [
 
 interface Props {
   initialData: Receivable[];
+  initialTotal: number;
   productTypes: ProductType[];
   currencies: Currency[];
-  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; invoice_key_op?: string; assignor_id?: string }) => Promise<Receivable[]>;
+  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; invoice_key_op?: string; assignor_id?: string }) => Promise<Page<Receivable>>;
   uploadXml: (formData: FormData) => Promise<ReceivableUploadResult>;
 }
 
-export function OperacoesView({ initialData, productTypes, currencies, fetchReceivables, uploadXml }: Props) {
+export function OperacoesView({ initialData, initialTotal, productTypes, currencies, fetchReceivables, uploadXml }: Props) {
   const [data, setData] = useState(initialData);
+  const [total, setTotal] = useState(initialTotal);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -88,20 +90,17 @@ export function OperacoesView({ initialData, productTypes, currencies, fetchRece
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const totalItems =
-    data.length === pageSize
-      ? (pageIndex + 1) * pageSize + 1
-      : pageIndex * pageSize + data.length;
-
   const loadPage = useCallback(
     (nextPage: number, nextSize: number, nextFilters: any = filters) => {
       startTransition(async () => {
-        const result = await fetchReceivables({
+        const raw = await fetchReceivables({
           page: nextPage + 1,
           pageSize: nextSize,
           ...nextFilters,
         });
-        setData(result);
+        const result = Array.isArray(raw) ? { items: raw, total: (raw as any).length } : raw;
+        setData(result.items);
+        setTotal(result.total);
       });
     },
     [fetchReceivables, filters],
@@ -186,7 +185,7 @@ export function OperacoesView({ initialData, productTypes, currencies, fetchRece
       <DataTable
         columns={columns}
         data={data}
-        totalItems={totalItems}
+        totalItems={total}
         pageSize={pageSize}
         pageIndex={pageIndex}
         onPageChange={handlePageChange}

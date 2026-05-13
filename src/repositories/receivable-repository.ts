@@ -1,9 +1,9 @@
 import { apiFetch, apiFetchJson } from "@/lib/api-client";
-import type { CursorPage, Receivable, ReceivableUploadResult } from "@/types";
+import type { CursorPage, Page, Receivable, ReceivableUploadResult } from "@/types";
 
 export async function listReceivables(
   token: string,
-  params?: { 
+  params?: {
     assignor_id?: string;
     drawee_id?: string;
     status?: string;
@@ -12,7 +12,7 @@ export async function listReceivables(
     page?: number;
     page_size?: number
   },
-): Promise<Receivable[]> {
+): Promise<Page<Receivable>> {
   const qs = new URLSearchParams();
   if (params?.assignor_id) qs.set("assignor_id", params.assignor_id);
   if (params?.drawee_id) qs.set("drawee_id", params.drawee_id);
@@ -22,7 +22,7 @@ export async function listReceivables(
   if (params?.page) qs.set("page", String(params.page));
   if (params?.page_size) qs.set("page_size", String(params.page_size));
 
-  return apiFetchJson<Receivable[]>(`/v1/receivables?${qs}`, {}, token);
+  return apiFetchJson<Page<Receivable>>(`/v1/receivables?${qs}`, {}, token);
 }
 
 export async function listReceivablesCursor(
