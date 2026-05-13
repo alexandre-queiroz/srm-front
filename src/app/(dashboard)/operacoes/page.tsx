@@ -1,4 +1,5 @@
 import { getAuthToken } from "@/lib/server-auth";
+import { safeCall } from "@/lib/safe-call";
 import { listReceivables, uploadReceivableXml } from "@/repositories/receivable-repository";
 import { listProductTypes } from "@/repositories/product-type-repository";
 import type { Receivable, ProductType, ReceivableUploadResult } from "@/types";
@@ -42,8 +43,8 @@ async function uploadXml(formData: FormData): Promise<ReceivableUploadResult> {
 
 export default async function OperacoesPage() {
   const [initialData, productTypes] = await Promise.all([
-    fetchReceivables({ page: 1, pageSize: 20 }).catch(() => [] as Receivable[]),
-    fetchProductTypes().catch(() => [] as ProductType[]),
+    safeCall(() => fetchReceivables({ page: 1, pageSize: 20 }), [] as Receivable[]),
+    safeCall(() => fetchProductTypes(), [] as ProductType[]),
   ]);
 
   return (

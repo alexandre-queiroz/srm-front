@@ -1,4 +1,5 @@
 import { getAuthToken } from "@/lib/server-auth";
+import { safeCall } from "@/lib/safe-call";
 import { listProductTypes } from "@/repositories/product-type-repository";
 import type { ProductType } from "@/types";
 import { ProdutosView } from "./_view";
@@ -10,12 +11,7 @@ async function fetchProductTypes(): Promise<ProductType[]> {
 }
 
 export default async function ProdutosPage() {
-  let initialData: ProductType[] = [];
-  try {
-    initialData = await fetchProductTypes();
-  } catch {
-    // endpoint indisponível — renderiza com lista vazia
-  }
+  const initialData = await safeCall(() => fetchProductTypes(), [] as ProductType[]);
 
   return (
     <ProdutosView

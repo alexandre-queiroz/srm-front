@@ -1,4 +1,5 @@
 import { getAuthToken } from "@/lib/server-auth";
+import { safeCall } from "@/lib/safe-call";
 import { listExchangeRates, triggerCollectExchangeRate } from "@/repositories/exchange-rate-repository";
 import type { ExchangeRate } from "@/types";
 import { CambioView } from "./_view";
@@ -16,12 +17,7 @@ async function triggerCollect(): Promise<ExchangeRate> {
 }
 
 export default async function CambioPage() {
-  let initialData: ExchangeRate[] = [];
-  try {
-    initialData = await fetchRates();
-  } catch {
-    // endpoint indisponível — renderiza com lista vazia
-  }
+  const initialData = await safeCall(() => fetchRates(), [] as ExchangeRate[]);
 
   return (
     <CambioView

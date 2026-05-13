@@ -1,4 +1,5 @@
 import { getAuthToken } from "@/lib/server-auth";
+import { safeCall } from "@/lib/safe-call";
 import { listBatches, getBatch, createBatch, previewBatch, queueBatch, simulateBatch } from "@/repositories/batch-repository";
 import { listReceivables } from "@/repositories/receivable-repository";
 import { listCompanies } from "@/repositories/company-repository";
@@ -66,8 +67,8 @@ async function queueBatchAction(batchId: string, expectedVersion: number): Promi
 
 export default async function LotesPage() {
   const [initialData, companies] = await Promise.all([
-    fetchBatches({ page: 1, pageSize: 20 }),
-    fetchCompanies(),
+    safeCall(() => fetchBatches({ page: 1, pageSize: 20 }), [] as Batch[]),
+    safeCall(() => fetchCompanies(), [] as Company[]),
   ]);
 
   return (

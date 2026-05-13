@@ -1,4 +1,5 @@
 import { getAuthToken } from "@/lib/server-auth";
+import { safeCall } from "@/lib/safe-call";
 import { listCompanies } from "@/repositories/company-repository";
 import type { Company } from "@/types";
 import { CedentesView } from "./_view";
@@ -10,12 +11,7 @@ async function fetchCompanies(query?: string): Promise<Company[]> {
 }
 
 export default async function CedentesPage() {
-  let initialData: Company[] = [];
-  try {
-    initialData = await fetchCompanies();
-  } catch {
-    // endpoint indisponível — renderiza com lista vazia
-  }
+  const initialData = await safeCall(() => fetchCompanies(), [] as Company[]);
 
   return (
     <CedentesView
