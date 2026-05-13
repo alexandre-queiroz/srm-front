@@ -2,40 +2,33 @@
 
 import React, { useState, useTransition } from "react";
 import { motion } from "framer-motion";
+import Icon from "@/components/ui/icon";
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import Icon from "@/components/ui/icon";
-import type { Company } from "@/types";
+import type { ProductType } from "@/types";
 import { toast } from "sonner";
 
 const columns = [
   { 
     id: "name", 
-    header: "Nome", 
-    enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) => <span className="font-bold text-fg-1">{row.name}</span>
+    header: "Produto", 
+    enableColumnFilter: true, 
+    cell: ({ row }: { row: ProductType }) => <span className="font-bold">{row.name}</span> 
   },
   { 
-    id: "cnpj", 
-    header: "CNPJ", 
-    enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) => (
-      <span className="text-[11px] text-fg-3 font-mono">
-        {row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
-      </span>
-    )
+    id: "spread", 
+    header: "Spread Médio (a.a.)",
+    cell: ({ row }: { row: ProductType }) => `${(Number(row.spread) * 100).toFixed(2)}%`
   },
   { 
-    id: "created_at", 
-    header: "Cadastrado em",
-    cell: ({ row }: { row: Company }) => 
-      new Date(row.created_at).toLocaleDateString("pt-BR")
-  },
-  { 
-    id: "status", 
+    id: "is_active", 
     header: "Status",
-    cell: () => <Badge color="success" size="sm" className="font-bold">ATIVO</Badge>
+    cell: ({ row }: { row: ProductType }) => (
+      <Badge color={row.is_active ? "success" : "neutral"} size="sm" className="font-bold">
+        {row.is_active ? "ATIVO" : "INATIVO"}
+      </Badge>
+    )
   },
   {
     id: "actions",
@@ -51,21 +44,21 @@ const columns = [
 ];
 
 interface Props {
-  initialData: Company[];
-  fetchCompanies: (query?: string) => Promise<Company[]>;
+  initialData: ProductType[];
+  fetchProductTypes: () => Promise<ProductType[]>;
 }
 
-export function CedentesView({ initialData, fetchCompanies }: Props) {
+export function ProdutosView({ initialData, fetchProductTypes }: Props) {
   const [data, setData] = useState(initialData);
   const [isPending, startTransition] = useTransition();
 
-  const handleRefresh = (query?: string) => {
+  const handleRefresh = () => {
     startTransition(async () => {
       try {
-        const result = await fetchCompanies(query);
+        const result = await fetchProductTypes();
         setData(result);
       } catch (err: any) {
-        toast.error("Erro ao carregar empresas.");
+        toast.error("Erro ao carregar produtos.");
       }
     });
   };
@@ -73,32 +66,26 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
   return (
     <div className="h-full flex flex-col gap-6">
       <div className="flex items-end justify-between shrink-0">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Empresas</h1>
-          <p className="t-body !text-fg-3 mt-0.5">Gestão de cedentes e sacados cadastrados no sistema.</p>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Produtos</h1>
+          <p className="t-body !text-fg-3 mt-0.5">Configuração de tipos de recebíveis e spreads operacionais.</p>
         </motion.div>
-
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             color="neutral" 
             className="h-9 px-4 text-xs font-bold" 
             icon="refresh-cw"
-            onClick={() => handleRefresh()}
+            onClick={handleRefresh}
             isLoading={isPending}
           >
             Atualizar
           </Button>
           <Button className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10" icon="plus">
-            Cadastrar
+            Novo Produto
           </Button>
         </div>
       </div>
-
       <DataTable 
         columns={columns} 
         data={data} 
@@ -107,9 +94,7 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
         pageIndex={0} 
         onPageChange={() => {}} 
         onPageSizeChange={() => {}} 
-        onFilterChange={(columnId, value) => {
-          if (columnId === 'name' || columnId === 'cnpj') handleRefresh(value);
-        }}
+        onFilterChange={() => {}} 
       />
     </div>
   );

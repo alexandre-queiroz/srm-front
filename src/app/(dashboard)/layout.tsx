@@ -181,7 +181,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+        <main className="flex-1 overflow-hidden p-8">
           {children}
         </main>
       </div>

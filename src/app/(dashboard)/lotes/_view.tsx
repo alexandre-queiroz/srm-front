@@ -318,7 +318,7 @@ export function LotesView({
     `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="h-full flex flex-col space-y-6">
+    <div className="h-full flex flex-col gap-6">
       <div className="flex items-end justify-between shrink-0">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Lotes</h1>
