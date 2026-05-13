@@ -36,7 +36,7 @@ export default function ParametrosPage() {
             <div className="flex items-center justify-between p-4 bg-surface-alt/50 rounded-xl border border-border-subtle/50">
               <div>
                 <p className="text-sm font-bold text-fg-1">Bloqueio de Cedentes Atrasados</p>
-                <p className="text-xs text-fg-3">Impedir novas operações se houver pendência > 5 dias.</p>
+                <p className="text-xs text-fg-3">Impedir novas operações se houver pendência &gt; 5 dias.</p>
               </div>
               <Switch defaultChecked color="danger" />
             </div>
