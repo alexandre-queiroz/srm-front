@@ -4,10 +4,22 @@ import { listProductTypes } from "@/repositories/product-type-repository";
 import type { Receivable, ProductType, ReceivableUploadResult } from "@/types";
 import { OperacoesView } from "./_view";
 
-async function fetchReceivables(page: number, pageSize: number): Promise<Receivable[]> {
+async function fetchReceivables(params: { 
+  page: number; 
+  pageSize: number; 
+  status?: string; 
+  invoice_key?: string;
+  assignor_id?: string;
+}): Promise<Receivable[]> {
   "use server";
   const token = await getAuthToken();
-  return listReceivables(token, { page, page_size: pageSize });
+  return listReceivables(token, { 
+    page: params.page, 
+    page_size: params.pageSize,
+    status: params.status,
+    invoice_key: params.invoice_key,
+    assignor_id: params.assignor_id
+  });
 }
 
 async function fetchProductTypes(): Promise<ProductType[]> {
@@ -30,8 +42,8 @@ async function uploadXml(formData: FormData): Promise<ReceivableUploadResult> {
 
 export default async function OperacoesPage() {
   const [initialData, productTypes] = await Promise.all([
-    fetchReceivables(1, 20),
-    fetchProductTypes(),
+    fetchReceivables({ page: 1, pageSize: 20 }).catch(() => [] as Receivable[]),
+    fetchProductTypes().catch(() => [] as ProductType[]),
   ]);
 
   return (
