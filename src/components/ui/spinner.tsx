@@ -1,50 +1,37 @@
-import React from 'react';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface SpinnerProps {
-  /** Size variant. */
-  size?: 'sm' | 'md' | 'lg';
-  /** Visual style variant. */
-  variant?: 'brand' | 'white' | 'neutral';
-  /** Additional CSS classes. */
+  size?: "sm" | "md" | "lg";
+  color?: "brand" | "accent" | "neutral" | "danger" | "success" | "warning" | "white";
   className?: string;
 }
 
-/**
- * SRM Spinner component.
- * Smoothly rotating SVG for loading states.
- */
-export default function Spinner({
-  size = 'md',
-  variant = 'brand',
-  className = '',
-}: SpinnerProps) {
+export default function Spinner({ size = "md", color = "brand", className = "" }: SpinnerProps) {
   const sizes = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-10 h-10',
+    sm: "w-4 h-4",
+    md: "w-6 h-6",
+    lg: "w-10 h-10",
   };
 
-  const variants = {
-    brand: 'text-brand-blue',
-    white: 'text-white',
-    neutral: 'text-fg-3',
+  const colors = {
+    brand: "text-brand-blue-500",
+    accent: "text-brand-orange-500",
+    neutral: "text-fg-3",
+    danger: "text-srm-danger-500",
+    success: "text-srm-success-500",
+    warning: "text-srm-warning-500",
+    white: "text-white",
   };
 
   return (
     <svg
-      className={`animate-spin ${sizes[size]} ${variants[variant]} ${className}`}
+      className={cn("animate-spin", sizes[size], colors[color], className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="3"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
       <path
         className="opacity-75"
         fill="currentColor"

@@ -1,75 +1,102 @@
-import React from 'react';
-import Icon from './icon';
+import React from "react";
+import Icon from "./icon";
+import { cn } from "@/lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   hint?: string;
   error?: string;
+  icon?: string;
+  iconRight?: string;
   prefixAddon?: React.ReactNode;
   suffixAddon?: React.ReactNode;
+  color?: "brand" | "accent" | "neutral" | "danger" | "success" | "warning";
 }
 
 export default function Input({
   label,
   hint,
   error,
+  icon,
+  iconRight,
   prefixAddon,
   suffixAddon,
   disabled,
-  className = '',
+  className = "",
+  color = "brand",
   ...props
 }: InputProps) {
+  const colorBorders = {
+    brand: "focus-within:border focus-within:border-brand-blue-500 focus-within:hover:border-brand-blue-500",
+    accent: "focus-within:border focus-within:border-brand-orange-500 focus-within:hover:border-brand-orange-500",
+    neutral: "focus-within:border focus-within:border-fg-2 focus-within:hover:border-fg-2",
+    danger: "focus-within:border focus-within:border-srm-danger-500 focus-within:hover:border-srm-danger-500",
+    success: "focus-within:border focus-within:border-srm-success-500 focus-within:hover:border-srm-success-500",
+    warning: "focus-within:border focus-within:border-srm-warning-500 focus-within:hover:border-srm-warning-500",
+  };
+
   const borderClass = error
-    ? 'border border-srm-danger-500 focus-within:ring-2 focus-within:ring-srm-danger-500/15'
-    : 'border-[0.5px] border-border-default focus-within:border focus-within:border-brand-blue focus-within:ring-2 focus-within:ring-brand-blue-500/12';
+    ? "border-[0.5px] border-srm-danger-500"
+    : `border-[0.5px] border-border-default shadow-xs hover:border-border-strong ${colorBorders[color]}`;
 
   return (
-    <div className={`flex flex-col gap-1.5 w-full ${className}`}>
-      {label && (
-        <label className="text-xs font-medium text-fg-2 tracking-wide">
-          {label}
-        </label>
-      )}
+    <div className={`flex w-full flex-col ${className}`}>
+      {/* Container fixo para o label não mudar a altura do bloco */}
+      <div className="min-h-[20px] mb-1">
+        {label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}
+      </div>
 
       <div
-        className={`
-          flex items-stretch overflow-hidden rounded-2xl
-          transition-all duration-[160ms] ease-[cubic-bezier(0.2,0,0,1)]
-          ${disabled ? 'bg-surface-sunken opacity-60 cursor-not-allowed' : 'bg-white'}
-          ${borderClass}
-        `}
+        className={cn(
+          "flex items-stretch overflow-hidden rounded-full transition-colors duration-200 h-10",
+          disabled ? "bg-surface-sunken cursor-not-allowed opacity-60" : "bg-white",
+          borderClass
+        )}
       >
         {prefixAddon && (
-          <div className="flex items-center px-3 bg-surface-alt text-fg-3 text-sm border-r border-[0.5px] border-border-default font-mono select-none">
+          <div className="text-fg-3 flex items-center pl-4 pr-1.5 text-[13px] select-none">
             {prefixAddon}
+          </div>
+        )}
+        {icon && !prefixAddon && (
+          <div className="text-fg-3 flex items-center pl-4 pr-1.5 select-none">
+            <Icon name={icon} size={15} stroke={2} />
           </div>
         )}
 
         <input
           {...props}
           disabled={disabled}
-          className={`
-            flex-1 py-2.5 px-3.5 text-sm text-fg-1 bg-transparent outline-none
-            placeholder:text-fg-disabled disabled:cursor-not-allowed
-            ${props.type === 'number' ? 't-num' : ''}
-          `}
+          className={cn(
+            "text-fg-1 placeholder:text-fg-disabled flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed",
+            props.type === "number" && "t-num",
+            (icon || prefixAddon) ? "pl-1.5" : "pl-4",
+            (iconRight || suffixAddon) ? "pr-1.5" : "pr-4"
+          )}
         />
 
         {suffixAddon && (
-          <div className="flex items-center px-3 bg-surface-alt text-fg-3 text-sm border-l border-[0.5px] border-border-default font-mono select-none">
+          <div className="text-fg-3 flex items-center pr-4 pl-1.5 text-[13px] select-none">
             {suffixAddon}
+          </div>
+        )}
+        {iconRight && !suffixAddon && (
+          <div className="text-fg-3 flex items-center pr-4 pl-1.5 select-none">
+            <Icon name={iconRight} size={15} stroke={2} />
           </div>
         )}
       </div>
 
-      {error ? (
-        <div className="flex items-center gap-1 text-[11.5px] text-srm-danger-600 font-medium">
-          <Icon name="alertCircle" size={12} stroke={2} />
-          {error}
-        </div>
-      ) : hint ? (
-        <p className="text-[11.5px] text-fg-3">{hint}</p>
-      ) : null}
+      <div className="min-h-[18px] mt-1">
+        {error ? (
+          <div className="text-srm-danger-600 flex items-center gap-1 text-[11.5px] font-medium">
+            <Icon name="alertCircle" size={12} stroke={2} />
+            {error}
+          </div>
+        ) : hint ? (
+          <p className="text-fg-3 text-[11.5px]">{hint}</p>
+        ) : null}
+      </div>
     </div>
   );
 }

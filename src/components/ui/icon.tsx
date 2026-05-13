@@ -1,53 +1,80 @@
-import React from 'react';
+"use client";
 
-interface IconProps {
-  /** Name of the icon to render (e.g., 'home', 'file', 'wallet') */
+import React, { useState, useEffect } from "react";
+import { type LucideProps } from "lucide-react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
+
+const toKebabCase = (str: string) =>
+  str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+
+const nameOverrides: Record<string, string> = {
+  file:     "file-text",
+  trending: "trending-up",
+  chart:    "bar-chart-2",
+  loader2:  "loader-circle",
+  notEqual: "ban",
+};
+
+// Module-level cache stores the resolved component, not a new lazy wrapper.
+// This avoids creating components during render on subsequent uses of the same icon.
+const componentCache = new Map<string, React.ComponentType<LucideProps>>();
+
+export interface IconProps extends Omit<LucideProps, "ref" | "stroke"> {
   name: string;
-  /** Size in pixels (width and height) */
-  size?: number;
-  /** Stroke width for the icon paths */
-  stroke?: number;
-  /** Additional CSS classes */
-  className?: string;
+  stroke?: number | string;
 }
 
-/**
- * SRM Icon component using inline SVG paths.
- * Aligned with Lucide style (1.5px default stroke).
- */
-export default function Icon({ 
-  name, 
-  size = 20, 
-  stroke = 1.5, 
-  className = '' 
+export default function Icon({
+  name,
+  color,
+  size = 20,
+  stroke = 1.5,
+  className,
+  ...rest
 }: IconProps) {
-  const paths: Record<string, string> = {
-    home:        '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-    file:        '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-    wallet:      '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
-    trending:    '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
-    chart:       '<line x1="3" y1="3" x2="3" y2="21"/><line x1="3" y1="21" x2="21" y2="21"/><rect x="7" y="13" width="3" height="6"/><rect x="13" y="9" width="3" height="10"/>',
-    alertCircle: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
-    arrowRight:  '<path d="M5 12h14M13 5l7 7-7 7"/>',
-    building:    '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
-    helpCircle:  '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-  };
-  
-  const d = paths[name] || paths.helpCircle;
-  
+  const normalizedName = (nameOverrides[name] ?? toKebabCase(name)) as keyof typeof dynamicIconImports;
+
+  const cached = componentCache.get(normalizedName) ?? null;
+  const [IconComponent, setIconComponent] = useState<React.ComponentType<LucideProps> | null>(cached);
+
+  useEffect(() => {
+    if (componentCache.has(normalizedName)) {
+      setIconComponent(componentCache.get(normalizedName)!);
+      return;
+    }
+
+    const loader = dynamicIconImports[normalizedName];
+    if (!loader) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`Icon "${name}" (normalized: "${normalizedName}") not found in lucide-react`);
+      }
+      return;
+    }
+
+    loader().then((mod) => {
+      // mod.default is the official public API — not __iconNode
+      const Component = (mod as unknown as { default: React.ComponentType<LucideProps> }).default;
+      componentCache.set(normalizedName, Component);
+      setIconComponent(() => Component);
+    });
+  }, [normalizedName, name]);
+
+  if (!IconComponent) {
+    return (
+      <span
+        className={`inline-block animate-pulse rounded bg-surface-alt/40 ${className ?? ""}`}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width={size} 
-      height={size}
-      fill="none" 
-      stroke="currentColor" 
+    <IconComponent
+      color={color}
+      size={size}
       strokeWidth={stroke}
-      strokeLinecap="round" 
-      strokeLinejoin="round"
       className={className}
-      dangerouslySetInnerHTML={{ __html: d }}
+      {...rest}
     />
   );
 }
