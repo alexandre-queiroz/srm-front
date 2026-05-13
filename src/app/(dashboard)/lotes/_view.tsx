@@ -100,14 +100,12 @@ const batchColumns = [
   {
     id: "id",
     header: "ID",
-    cell: ({ row }: { row: Batch }) => (
-      <span className="font-mono text-xs text-fg-2 tracking-tight whitespace-nowrap">{row.id}</span>
-    ),
+    cell: ({ row }: { row: Batch }) => row.id,
   },
   {
     id: "assignor",
     header: "Cedente",
-    cell: ({ row }: { row: Batch }) => <span className="font-medium">{row.assignor.social_reason}</span>,
+    cell: ({ row }: { row: Batch }) => row.assignor.social_reason,
   },
   {
     id: "total_receivables",

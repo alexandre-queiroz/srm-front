@@ -29,18 +29,18 @@ const columns = [
     header: "Chave NF-e",
     enableColumnFilter: true,
     cell: ({ row }: { row: Receivable }) => (
-      <span className="font-mono text-xs text-fg-2 truncate max-w-[260px] block">{row.invoice_key}</span>
+      <span className="truncate max-w-[260px] block">{row.invoice_key}</span>
     ),
   },
   {
     id: "assignor",
     header: "Cedente",
-    cell: ({ row }: { row: Receivable }) => <span className="font-medium">{row.assignor.social_reason}</span>,
+    cell: ({ row }: { row: Receivable }) => row.assignor.social_reason,
   },
   {
     id: "drawee",
     header: "Sacado",
-    cell: ({ row }: { row: Receivable }) => <span>{row.drawee.social_reason}</span>,
+    cell: ({ row }: { row: Receivable }) => row.drawee.social_reason,
   },
   {
     id: "due_date",

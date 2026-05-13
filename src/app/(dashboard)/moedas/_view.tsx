@@ -14,22 +14,18 @@ const columns = [
     id: "code",
     header: "Código",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Currency }) => (
-      <span className="font-mono font-bold text-fg-1">{row.code}</span>
-    ),
+    cell: ({ row }: { row: Currency }) => row.code,
   },
   {
     id: "name",
     header: "Nome",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Currency }) => <span>{row.name}</span>,
+    cell: ({ row }: { row: Currency }) => row.name,
   },
   {
     id: "symbol",
     header: "Símbolo",
-    cell: ({ row }: { row: Currency }) => (
-      <span className="font-mono text-fg-2">{row.symbol}</span>
-    ),
+    cell: ({ row }: { row: Currency }) => row.symbol,
   },
   {
     id: "is_base",

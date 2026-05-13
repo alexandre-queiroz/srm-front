@@ -13,26 +13,19 @@ const columns = [
     id: "name",
     header: "Razão Social",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) => (
-      <span className="font-bold text-fg-1">{row.social_reason}</span>
-    ),
+    cell: ({ row }: { row: Company }) => row.social_reason,
   },
   {
     id: "fantasy_name",
     header: "Nome Fantasia",
-    cell: ({ row }: { row: Company }) => (
-      <span className="text-fg-2">{row.fantasy_name ?? <span className="text-fg-4 italic">—</span>}</span>
-    ),
+    cell: ({ row }: { row: Company }) => row.fantasy_name ?? "—",
   },
   {
     id: "cnpj",
     header: "CNPJ",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) => (
-      <span className="text-[11px] text-fg-3 font-mono">
-        {row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
-      </span>
-    ),
+    cell: ({ row }: { row: Company }) =>
+      row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"),
   },
   {
     id: "created_at",

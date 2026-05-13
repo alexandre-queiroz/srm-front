@@ -167,8 +167,8 @@ export function DataTable<TData>({
         
         <div className="flex-1 overflow-auto">
           <Table className={minWidth}>
-            <TableHeader>
-              <TableRow className="bg-surface-alt/30 hover:bg-surface-alt/30 border-b-border-subtle">
+            <TableHeader className="sticky top-0 z-10 bg-white">
+              <TableRow className="bg-surface-alt hover:bg-surface-alt border-b-border-subtle">
                 {columns.map((col) => (
                   <TableHead key={col.id} className="align-middle py-3 px-5">
                     <span className="text-[11.5px] uppercase tracking-wider text-fg-2 font-medium whitespace-nowrap">{col.header}</span>
