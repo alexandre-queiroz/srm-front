@@ -11,13 +11,17 @@ import type { Company } from "@/types";
 const columns = [
   {
     id: "name",
-    header: "Nome",
+    header: "Razão Social",
     enableColumnFilter: true,
     cell: ({ row }: { row: Company }) => (
-      <div>
-        <span className="font-bold text-fg-1">{row.social_reason}</span>
-        {row.fantasy_name && <p className="text-xs text-fg-3 mt-0.5">{row.fantasy_name}</p>}
-      </div>
+      <span className="font-bold text-fg-1">{row.social_reason}</span>
+    ),
+  },
+  {
+    id: "fantasy_name",
+    header: "Nome Fantasia",
+    cell: ({ row }: { row: Company }) => (
+      <span className="text-fg-2">{row.fantasy_name ?? <span className="text-fg-4 italic">—</span>}</span>
     ),
   },
   {
