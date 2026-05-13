@@ -3,10 +3,11 @@ import type { Batch, BatchDetail, BatchPreview, CursorPage } from "@/types";
 
 export async function listBatches(
   token: string,
-  params?: { assignor_id?: string; page?: number; page_size?: number },
+  params?: { assignor_id?: string; status?: string; page?: number; page_size?: number },
 ): Promise<Batch[]> {
   const qs = new URLSearchParams();
   if (params?.assignor_id) qs.set("assignor_id", params.assignor_id);
+  if (params?.status) qs.set("status", params.status);
   if (params?.page) qs.set("page", String(params.page));
   if (params?.page_size) qs.set("page_size", String(params.page_size));
 
@@ -15,10 +16,11 @@ export async function listBatches(
 
 export async function listBatchesCursor(
   token: string,
-  params?: { assignor_id?: string; after?: string; page_size?: number },
+  params?: { assignor_id?: string; status?: string; after?: string; page_size?: number },
 ): Promise<CursorPage<Batch>> {
   const qs = new URLSearchParams();
   if (params?.assignor_id) qs.set("assignor_id", params.assignor_id);
+  if (params?.status) qs.set("status", params.status);
   if (params?.after) qs.set("after", params.after);
   if (params?.page_size) qs.set("page_size", String(params.page_size));
 
@@ -31,6 +33,17 @@ export async function getBatch(token: string, batchId: string): Promise<BatchDet
 
 export async function previewBatch(token: string, batchId: string): Promise<BatchPreview> {
   return apiFetchJson<BatchPreview>(`/v1/batches/${batchId}/preview`, {}, token);
+}
+
+export async function simulateBatch(
+  token: string,
+  payload: { assignor_id: string; receivable_ids: string[] },
+): Promise<BatchPreview> {
+  return apiFetchJson<BatchPreview>(
+    `/v1/batches/simulate`,
+    { method: "POST", body: JSON.stringify(payload) },
+    token,
+  );
 }
 
 export async function createBatch(

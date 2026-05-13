@@ -22,10 +22,10 @@ async function fetchBatches(params: {
   });
 }
 
-async function fetchCompanies(name?: string): Promise<Company[]> {
+async function fetchCompanies(social_reason?: string): Promise<Company[]> {
   "use server";
   const token = await getAuthToken();
-  return listCompanies(token, { name, limit: 50 });
+  return listCompanies(token, { social_reason, limit: 50 });
 }
 
 async function fetchReceivablesByAssignor(assignorId: string, page: number, pageSize: number): Promise<Receivable[]> {

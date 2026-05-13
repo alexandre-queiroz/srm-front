@@ -5,8 +5,8 @@ import type { Company } from "@/types";
 import { CedentesView } from "./_view";
 
 async function fetchCompanies(params?: {
-  name?: string;
-  name_op?: string;
+  social_reason?: string;
+  social_reason_op?: string;
   cnpj?: string;
   cnpj_op?: string;
 }): Promise<Company[]> {

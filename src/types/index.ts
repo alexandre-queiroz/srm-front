@@ -1,7 +1,18 @@
 export interface Company {
   id: string;
   cnpj: string;
+  social_reason: string;
+  fantasy_name: string | null;
+  created_at: string;
+}
+
+export interface Currency {
+  id: string;
+  code: string;
   name: string;
+  symbol: string;
+  is_base: boolean;
+  is_active: boolean;
   created_at: string;
 }
 

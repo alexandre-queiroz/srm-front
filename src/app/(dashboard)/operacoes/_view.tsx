@@ -35,12 +35,12 @@ const columns = [
   {
     id: "assignor",
     header: "Cedente",
-    cell: ({ row }: { row: Receivable }) => <span className="font-medium">{row.assignor.name}</span>,
+    cell: ({ row }: { row: Receivable }) => <span className="font-medium">{row.assignor.social_reason}</span>,
   },
   {
     id: "drawee",
     header: "Sacado",
-    cell: ({ row }: { row: Receivable }) => <span>{row.drawee.name}</span>,
+    cell: ({ row }: { row: Receivable }) => <span>{row.drawee.social_reason}</span>,
   },
   {
     id: "due_date",

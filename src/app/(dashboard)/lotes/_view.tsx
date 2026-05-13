@@ -56,7 +56,7 @@ function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily
   return (
     <div className="border border-border-default rounded-xl overflow-hidden">
       <div className="px-4 py-3 space-y-1.5">
-        <p className="text-sm font-semibold text-fg-1 leading-snug">{item.drawee.name}</p>
+        <p className="text-sm font-semibold text-fg-1 leading-snug">{item.drawee.social_reason}</p>
         <p className="text-xs text-fg-3">Parcela {item.installment_number} · {item.term_days}d</p>
         <p className="font-mono text-[10px] text-fg-3 break-all leading-snug">{item.invoice_key}</p>
       </div>
@@ -107,7 +107,7 @@ const batchColumns = [
   {
     id: "assignor",
     header: "Cedente",
-    cell: ({ row }: { row: Batch }) => <span className="font-medium">{row.assignor.name}</span>,
+    cell: ({ row }: { row: Batch }) => <span className="font-medium">{row.assignor.social_reason}</span>,
   },
   {
     id: "total_receivables",
@@ -312,7 +312,7 @@ export function LotesView({
     }
   };
 
-  const companyOptions = companies.map((c) => ({ value: c.id, label: c.name }));
+  const companyOptions = companies.map((c) => ({ value: c.id, label: c.fantasy_name ?? c.social_reason }));
 
   const fmtBRL = (v: string | number) =>
     `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -377,7 +377,7 @@ export function LotesView({
                     </Badge>
                   </div>
                   <ModalDescription>
-                    {detailBatch.assignor.name} · {detailBatch.total_receivables} título(s)
+                    {detailBatch.assignor.fantasy_name ?? detailBatch.assignor.social_reason} · {detailBatch.total_receivables} título(s)
                   </ModalDescription>
                 </ModalHeader>
 
@@ -540,7 +540,7 @@ export function LotesView({
                         <div className="flex items-center gap-3">
                           <Checkbox checked={selectedReceivableIds.has(r.id)} onChange={() => toggleReceivable(r.id)} />
                           <div>
-                            <p className="text-sm font-medium text-fg-1">{r.drawee.name}</p>
+                            <p className="text-sm font-medium text-fg-1">{r.drawee.social_reason}</p>
                             <p className="text-xs text-fg-3">
                               Venc. {new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR")} · {r.invoice_key.slice(0, 16)}…
                             </p>

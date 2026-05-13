@@ -13,7 +13,12 @@ const columns = [
     id: "name",
     header: "Nome",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) => <span className="font-bold text-fg-1">{row.name}</span>,
+    cell: ({ row }: { row: Company }) => (
+      <div>
+        <span className="font-bold text-fg-1">{row.social_reason}</span>
+        {row.fantasy_name && <p className="text-xs text-fg-3 mt-0.5">{row.fantasy_name}</p>}
+      </div>
+    ),
   },
   {
     id: "cnpj",
@@ -58,8 +63,8 @@ const columns = [
 interface Props {
   initialData: Company[];
   fetchCompanies: (params?: {
-    name?: string;
-    name_op?: string;
+    social_reason?: string;
+    social_reason_op?: string;
     cnpj?: string;
     cnpj_op?: string;
   }) => Promise<Company[]>;
@@ -73,8 +78,8 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
   const loadData = (nextFilters: Record<string, string>) => {
     startTransition(async () => {
       const result = await fetchCompanies({
-        name: nextFilters.name,
-        name_op: nextFilters.name_op,
+        social_reason: nextFilters.social_reason,
+        social_reason_op: nextFilters.social_reason_op,
         cnpj: nextFilters.cnpj,
         cnpj_op: nextFilters.cnpj_op,
       });
@@ -83,12 +88,13 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
   };
 
   const handleFilterChange = (columnId: string, value: string, operator?: string) => {
-    const nextFilters = { ...filters, [columnId]: value };
+    const key = columnId === "name" ? "social_reason" : columnId;
+    const nextFilters = { ...filters, [key]: value };
     if (!value) {
-      delete nextFilters[columnId];
-      delete nextFilters[`${columnId}_op`];
+      delete nextFilters[key];
+      delete nextFilters[`${key}_op`];
     } else if (operator) {
-      nextFilters[`${columnId}_op`] = operator;
+      nextFilters[`${key}_op`] = operator;
     }
     setFilters(nextFilters);
     loadData(nextFilters);

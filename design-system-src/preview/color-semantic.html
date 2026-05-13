@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../colors_and_type.css" />
+    <link rel="stylesheet" href="_card.css" />
+    <style>
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .group-name {
+        font-size: 12px;
+        color: var(--fg-2);
+        font-weight: 500;
+      }
+      .swatches {
+        display: flex;
+        gap: 4px;
+      }
+      .sw {
+        width: 44px;
+        height: 44px;
+        border-radius: 6px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+        padding: 4px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: white;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+      }
+      .sw.light {
+        color: var(--srm-neutral-900);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .example {
+        font-size: 13px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="row">
+        <div class="group">
+          <div class="group-name">Success — operação liquidada, pago</div>
+          <div class="swatches">
+            <div class="sw light" style="background: #e8f6ee">50</div>
+            <div class="sw light" style="background: #c6e9d3">100</div>
+            <div class="sw" style="background: #1f8a4d">500</div>
+            <div class="sw" style="background: #186f3d">600</div>
+            <div class="sw" style="background: #11572f">700</div>
+          </div>
+          <div class="example" style="background: #e8f6ee; color: #11572f">
+            <span style="width: 6px; height: 6px; border-radius: 999px; background: #1f8a4d"></span>Liquidado
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-name">Warning — aguardando, em análise</div>
+          <div class="swatches">
+            <div class="sw light" style="background: #fdf6e1">50</div>
+            <div class="sw light" style="background: #fae9b0">100</div>
+            <div class="sw" style="background: #b57e00">500</div>
+            <div class="sw" style="background: #8f6300">600</div>
+            <div class="sw" style="background: #6e4c00">700</div>
+          </div>
+          <div class="example" style="background: #fdf6e1; color: #6e4c00">
+            <span style="width: 6px; height: 6px; border-radius: 999px; background: #b57e00"></span>Em análise
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-name">Danger — inadimplente, rejeitado</div>
+          <div class="swatches">
+            <div class="sw light" style="background: #fceded">50</div>
+            <div class="sw light" style="background: #f7cece">100</div>
+            <div class="sw" style="background: #c8252b">500</div>
+            <div class="sw" style="background: #a41b20">600</div>
+            <div class="sw" style="background: #7c1518">700</div>
+          </div>
+          <div class="example" style="background: #fceded; color: #7c1518">
+            <span style="width: 6px; height: 6px; border-radius: 999px; background: #c8252b"></span>Rejeitado
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-name">Info — usa azul SRM</div>
+          <div class="swatches">
+            <div class="sw light" style="background: #eef3fb">50</div>
+            <div class="sw light" style="background: #d5e2f2">100</div>
+            <div class="sw" style="background: #2461af">500</div>
+            <div class="sw" style="background: #1d4f8f">600</div>
+            <div class="sw" style="background: #173e72">700</div>
+          </div>
+          <div class="example" style="background: #eef3fb; color: #173e72">
+            <span style="width: 6px; height: 6px; border-radius: 999px; background: #2461af"></span>Em processamento
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../colors_and_type.css" />
+    <link rel="stylesheet" href="_card.css" />
+    <style>
+      .row {
+        display: grid;
+        grid-template-columns: 110px 1fr 80px;
+        gap: 14px;
+        align-items: center;
+        font-size: 13px;
+      }
+      .name {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--fg-2);
+      }
+      .track {
+        height: 8px;
+        background: var(--bg-sunken);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+      }
+      .fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 30%;
+        background: var(--srm-blue-500);
+        border-radius: 999px;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+      }
+      .ms {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--fg-3);
+        text-align: right;
+      }
+      @keyframes slide-instant {
+        from {
+          left: 0%;
+        }
+        to {
+          left: 70%;
+        }
+      }
+      @keyframes slide-fast {
+        from {
+          left: 0%;
+        }
+        to {
+          left: 70%;
+        }
+      }
+      @keyframes slide-base {
+        from {
+          left: 0%;
+        }
+        to {
+          left: 70%;
+        }
+      }
+      @keyframes slide-slow {
+        from {
+          left: 0%;
+        }
+        to {
+          left: 70%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="t-eyebrow">Motion · ease-standard cubic-bezier(0.2, 0, 0, 1)</div>
+
+      <div class="row">
+        <div class="name">instant</div>
+        <div class="track">
+          <div class="fill" style="animation: slide-instant 80ms cubic-bezier(0.2, 0, 0, 1) infinite alternate"></div>
+        </div>
+        <div class="ms">80 ms</div>
+      </div>
+      <div class="row">
+        <div class="name">fast</div>
+        <div class="track"><div class="fill" style="animation: slide-fast 160ms cubic-bezier(0.2, 0, 0, 1) infinite alternate"></div></div>
+        <div class="ms">160 ms</div>
+      </div>
+      <div class="row">
+        <div class="name">base</div>
+        <div class="track"><div class="fill" style="animation: slide-base 220ms cubic-bezier(0.2, 0, 0, 1) infinite alternate"></div></div>
+        <div class="ms">220 ms</div>
+      </div>
+      <div class="row">
+        <div class="name">slow</div>
+        <div class="track"><div class="fill" style="animation: slide-slow 320ms cubic-bezier(0.2, 0, 0, 1) infinite alternate"></div></div>
+        <div class="ms">320 ms</div>
+      </div>
+
+      <div class="meta" style="margin-top: 6px">Sem bounce, sem overshoot. Hovers: 160ms. Modais: 220ms. Page transitions: 320ms.</div>
+    </div>
+  </body>
+</html>

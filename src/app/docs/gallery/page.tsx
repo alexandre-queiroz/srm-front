@@ -65,21 +65,21 @@ export default function ComponentGallery() {
       header: "ID",
       enableColumnFilter: true,
       filterType: "text",
-      cell: (row) => <span className="text-brand-blue-600 font-medium whitespace-nowrap">{row.id}</span>
+      cell: ({ row }) => <span className="text-brand-blue-600 font-medium whitespace-nowrap">{row.id}</span>
     },
     {
       id: "cedente",
       header: "Cedente",
       enableColumnFilter: true,
       filterType: "text",
-      cell: (row) => row.cedente
+      cell: ({ row }) => row.cedente
     },
     {
       id: "status",
       header: "Status",
       enableColumnFilter: true,
       filterType: "enum",
-      cell: (row) => (
+      cell: ({ row }) => (
         <Badge color={row.status === "Liquidado" ? "success" : row.status === "Rejeitado" ? "danger" : "warning"}>
           {row.status}
         </Badge>
@@ -90,14 +90,14 @@ export default function ComponentGallery() {
       header: "Data",
       enableColumnFilter: true,
       filterType: "date",
-      cell: (row) => row.data
+      cell: ({ row }) => row.data
     },
     {
       id: "valor",
       header: "Valor",
       enableColumnFilter: true,
       filterType: "number",
-      cell: (row) => <div className="font-medium">{row.valor}</div>
+      cell: ({ row }) => <div className="font-medium">{row.valor}</div>
     }
   ];
 

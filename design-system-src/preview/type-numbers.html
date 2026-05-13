@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../colors_and_type.css" />
+    <link rel="stylesheet" href="_card.css" />
+  </head>
+  <body>
+    <div class="card">
+      <div class="meta">Tabular figures — <span class="meta-strong">font-variant-numeric: tabular-nums lining-nums</span></div>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start">
+        <div>
+          <div class="t-eyebrow" style="margin-bottom: 6px">KPI grande · t-kpi</div>
+          <div class="t-kpi">R$ 1.284.430,50</div>
+          <div class="t-caption" style="margin-top: 4px">Saldo a receber · 23 duplicatas</div>
+        </div>
+
+        <div>
+          <div class="t-eyebrow" style="margin-bottom: 6px">Coluna numérica · t-num-mono</div>
+          <div style="display: grid; grid-template-columns: auto auto; gap: 4px 18px; font-size: 15px">
+            <span style="color: var(--fg-2)">Bruto</span> <span class="t-num-mono" style="text-align: right">12.430,50</span>
+            <span style="color: var(--fg-2)">Taxa</span> <span class="t-num-mono" style="text-align: right"> 248,61</span>
+            <span style="color: var(--fg-2)">IOF</span> <span class="t-num-mono" style="text-align: right"> 18,07</span>
+            <span style="color: var(--fg-2)">Líquido</span>
+            <span class="t-num-mono" style="text-align: right; color: var(--srm-success-600); font-weight: 600">12.163,82</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px">
+        <div class="t-eyebrow" style="margin-bottom: 6px">Locale pt-BR</div>
+        <div style="display: flex; gap: 28px; flex-wrap: wrap; font-size: 14px">
+          <span
+            ><span class="t-num" style="font-weight: 600">R$ 1.234,56</span
+            ><span style="color: var(--fg-3); margin-left: 8px">moeda</span></span
+          >
+          <span
+            ><span class="t-num" style="font-weight: 600">7,25% a.m.</span
+            ><span style="color: var(--fg-3); margin-left: 8px">taxa</span></span
+          >
+          <span
+            ><span class="t-num" style="font-weight: 600">28 abr 2026</span
+            ><span style="color: var(--fg-3); margin-left: 8px">data</span></span
+          >
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -28,6 +28,7 @@ const menuGroups = [
     title: "Configurações",
     items: [
       { icon: "dollar-sign", label: "Câmbio", href: "/cambio" },
+      { icon: "coins", label: "Moedas", href: "/moedas" },
       { icon: "package", label: "Produtos", href: "/produtos" },
       { icon: "settings", label: "Parâmetros", href: "/parametros" },
     ]
