@@ -3,10 +3,22 @@ import type { CursorPage, Receivable, ReceivableUploadResult } from "@/types";
 
 export async function listReceivables(
   token: string,
-  params?: { assignor_id?: string; page?: number; page_size?: number },
+  params?: { 
+    assignor_id?: string;
+    drawee_id?: string;
+    status?: string;
+    invoice_key?: string;
+    invoice_key_op?: string;
+    page?: number;
+    page_size?: number
+  },
 ): Promise<Receivable[]> {
   const qs = new URLSearchParams();
   if (params?.assignor_id) qs.set("assignor_id", params.assignor_id);
+  if (params?.drawee_id) qs.set("drawee_id", params.drawee_id);
+  if (params?.status) qs.set("status", params.status);
+  if (params?.invoice_key) qs.set("invoice_key", params.invoice_key);
+  if (params?.invoice_key_op) qs.set("invoice_key_op", params.invoice_key_op);
   if (params?.page) qs.set("page", String(params.page));
   if (params?.page_size) qs.set("page_size", String(params.page_size));
 
@@ -15,10 +27,20 @@ export async function listReceivables(
 
 export async function listReceivablesCursor(
   token: string,
-  params?: { assignor_id?: string; after?: string; page_size?: number },
+  params?: { 
+    assignor_id?: string; 
+    drawee_id?: string;
+    status?: string;
+    invoice_key?: string;
+    after?: string; 
+    page_size?: number 
+  },
 ): Promise<CursorPage<Receivable>> {
   const qs = new URLSearchParams();
   if (params?.assignor_id) qs.set("assignor_id", params.assignor_id);
+  if (params?.drawee_id) qs.set("drawee_id", params.drawee_id);
+  if (params?.status) qs.set("status", params.status);
+  if (params?.invoice_key) qs.set("invoice_key", params.invoice_key);
   if (params?.after) qs.set("after", params.after);
   if (params?.page_size) qs.set("page_size", String(params.page_size));
 

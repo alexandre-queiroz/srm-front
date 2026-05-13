@@ -5,20 +5,22 @@ import { listProductTypes } from "@/repositories/product-type-repository";
 import type { Receivable, ProductType, ReceivableUploadResult } from "@/types";
 import { OperacoesView } from "./_view";
 
-async function fetchReceivables(params: { 
-  page: number; 
-  pageSize: number; 
-  status?: string; 
+async function fetchReceivables(params: {
+  page: number;
+  pageSize: number;
+  status?: string;
   invoice_key?: string;
+  invoice_key_op?: string;
   assignor_id?: string;
 }): Promise<Receivable[]> {
   "use server";
   const token = await getAuthToken();
-  return listReceivables(token, { 
-    page: params.page, 
+  return listReceivables(token, {
+    page: params.page,
     page_size: params.pageSize,
     status: params.status,
     invoice_key: params.invoice_key,
+    invoice_key_op: params.invoice_key_op,
     assignor_id: params.assignor_id
   });
 }

@@ -35,13 +35,11 @@ const columns = [
   {
     id: "assignor",
     header: "Cedente",
-    enableColumnFilter: true,
     cell: ({ row }: { row: Receivable }) => <span className="font-medium">{row.assignor.name}</span>,
   },
   {
     id: "drawee",
     header: "Sacado",
-    enableColumnFilter: true,
     cell: ({ row }: { row: Receivable }) => <span>{row.drawee.name}</span>,
   },
   {
@@ -70,7 +68,7 @@ const columns = [
 interface Props {
   initialData: Receivable[];
   productTypes: ProductType[];
-  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; assignor_id?: string }) => Promise<Receivable[]>;
+  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; invoice_key_op?: string; assignor_id?: string }) => Promise<Receivable[]>;
   uploadXml: (formData: FormData) => Promise<ReceivableUploadResult>;
 }
 
@@ -119,9 +117,14 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
     loadPage(0, size);
   };
 
-  const handleFilterChange = (columnId: string, value: string) => {
+  const handleFilterChange = (columnId: string, value: string, operator?: string) => {
     const nextFilters = { ...filters, [columnId]: value };
-    if (!value) delete nextFilters[columnId];
+    if (!value) {
+      delete nextFilters[columnId];
+      delete nextFilters[`${columnId}_op`];
+    } else if (operator) {
+      nextFilters[`${columnId}_op`] = operator;
+    }
     setFilters(nextFilters);
     setPageIndex(0);
     loadPage(0, pageSize, nextFilters);
