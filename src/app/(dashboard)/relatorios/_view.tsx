@@ -197,17 +197,65 @@ interface Props {
 
 export function RelatoriosView({ initialData, fetchReport }: Props) {
   const [data, setData] = useState<SettlementBatchReport>(initialData);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const load = (params?: { page?: number; page_size?: number }) => {
+  const load = (params?: { page?: number; start_date?: string; end_date?: string }) => {
+    const resolvedStart = params?.start_date ?? (startDate || undefined);
+    const resolvedEnd   = params?.end_date   ?? (endDate   || undefined);
     startTransition(async () => {
       try {
-        const result = await fetchReport(params);
+        const result = await fetchReport({
+          page: params?.page ?? 1,
+          start_date: resolvedStart ? `${resolvedStart}T00:00:00` : undefined,
+          end_date:   resolvedEnd   ? `${resolvedEnd}T23:59:59`   : undefined,
+        });
         setData(result);
       } catch {
         toast.error("Erro ao carregar relatório.");
       }
     });
+  };
+
+  const handleApply = () => load({ page: 1, start_date: startDate || undefined, end_date: endDate || undefined });
+
+  const handleExportCSV = () => {
+    const rows: string[][] = [
+      ["Lote", "Cedente", "CNPJ Cedente", "Processado em", "NF-e", "Parcela", "Sacado", "CNPJ Sacado",
+       "Moeda", "Vlr. Face", "Vlr. Face BRL", "Vlr. Líquido", "Câmbio", "Prazo (d)", "Taxa Base", "Spread", "Liquidado em"],
+    ];
+    for (const batch of data.items) {
+      for (const t of batch.transactions) {
+        rows.push([
+          batch.batch_id,
+          batch.assignor_name,
+          fmtCNPJ(batch.assignor_cnpj),
+          fmtDate(batch.processed_at),
+          t.invoice_key,
+          t.installment_number,
+          t.drawee_name,
+          fmtCNPJ(t.drawee_cnpj),
+          t.instrument_currency,
+          t.face_value,
+          t.face_value_brl,
+          t.present_value,
+          t.exchange_rate_used ?? "",
+          String(t.term_days),
+          t.base_rate_used,
+          t.spread_used,
+          fmtDate(t.liquidated_at),
+        ]);
+      }
+    }
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `extrato_liquidacao${startDate ? `_${startDate}` : ""}${endDate ? `_${endDate}` : ""}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const { summary, items, page, total_pages } = data;
@@ -227,9 +275,50 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
           <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Extrato de Liquidação</h1>
           <p className="t-body !text-fg-3 mt-0.5">Lotes aprovados com seus títulos liquidados.</p>
         </motion.div>
-        <Button icon="refresh-cw" onClick={() => load({ page })} isLoading={isPending}>
-          Atualizar
+        <div className="flex items-center gap-2">
+          <Button variant="outline" color="neutral" icon="download" onClick={handleExportCSV} disabled={items.length === 0}>
+            Exportar CSV
+          </Button>
+          <Button icon="refresh-cw" onClick={() => load({ page })} isLoading={isPending}>
+            Atualizar
+          </Button>
+        </div>
+      </div>
+
+      {/* Date range filter */}
+      <div className="flex items-end gap-3 shrink-0">
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-semibold text-fg-3 uppercase tracking-wider">De</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="h-9 rounded-xl border-[0.5px] border-border-default bg-white px-3 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-semibold text-fg-3 uppercase tracking-wider">Até</label>
+          <input
+            type="date"
+            value={endDate}
+            min={startDate || undefined}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="h-9 rounded-xl border-[0.5px] border-border-default bg-white px-3 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
+          />
+        </div>
+        <Button onClick={handleApply} isLoading={isPending} icon="search" className="h-9 px-4 text-xs font-bold">
+          Filtrar
         </Button>
+        {(startDate || endDate) && (
+          <Button
+            variant="outline"
+            color="neutral"
+            className="h-9 px-3 text-xs"
+            onClick={() => { setStartDate(""); setEndDate(""); load({ page: 1, start_date: undefined, end_date: undefined }); }}
+          >
+            Limpar
+          </Button>
+        )}
       </div>
 
       {/* KPI cards */}
