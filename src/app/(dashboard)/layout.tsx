@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 import Avatar from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -37,11 +37,29 @@ const menuGroups = [
 
 import { useRouter } from "next/navigation";
 import { logoutAction } from "@/lib/auth-actions";
+import { getCookie } from "@/lib/cookies";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userName, setUserName] = useState("SRM");
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const raw = getCookie("srm_user");
+      if (raw) {
+        const parsed = JSON.parse(raw) as { name: string };
+        if (parsed.name) setUserName(parsed.name);
+      }
+    } catch {
+      // keep fallback "SRM"
+    }
+  }, []);
+
+  const displayName = userName;
+  const displayInitials = userName === "SRM" ? "SRM" : userName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const displayShort = userName === "SRM" ? "SRM" : userName.split(" ").map((w, i, a) => i === 0 || i === a.length - 1 ? w : null).filter(Boolean).join(" ");
 
   const handleLogout = async () => {
     await logoutAction();
@@ -121,10 +139,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             "flex items-center p-2 rounded-2xl bg-white/5 border border-white/10",
             isCollapsed ? "justify-center" : "justify-start"
           )}>
-            <Avatar name="Alexandre Queiroz" size="sm" />
+            <Avatar name={displayName} size="sm" />
             {!isCollapsed && (
               <div className="ml-3 overflow-hidden">
-                <p className="text-xs font-bold truncate">Alexandre Queiroz</p>
+                <p className="text-xs font-bold truncate">{displayName}</p>
                 <p className="text-[10px] text-white/40 truncate">Administrador</p>
               </div>
             )}
@@ -158,19 +176,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 pr-4 border-r border-border-subtle">
-              <button className="w-9 h-9 rounded-lg hover:bg-surface-alt flex items-center justify-center text-fg-2 transition-colors relative">
-                <Icon name="alert-circle" size={18} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-srm-danger-500 rounded-full border-2 border-white" />
-              </button>
-            </div>
-            
-            <div className="flex items-center gap-3 ml-2">
+            <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-fg-1 leading-none">Alexandre Q.</p>
-                <p className="text-[10px] text-fg-3 mt-1 uppercase font-bold tracking-widest opacity-60">ID: 48129</p>
+                <p className="text-sm font-bold text-fg-1 leading-none">{displayShort}</p>
+                <p className="text-[10px] text-fg-3 mt-1 uppercase font-bold tracking-widest opacity-60">Administrador</p>
               </div>
-              <Avatar name="Alexandre Queiroz" size="sm" />
+              <Avatar name={displayName} size="sm" />
               <button 
                 onClick={handleLogout}
                 className="ml-2 w-9 h-9 rounded-lg bg-srm-danger-50 text-srm-danger-600 hover:bg-srm-danger-100 transition-all flex items-center justify-center border border-srm-danger-100 cursor-pointer"

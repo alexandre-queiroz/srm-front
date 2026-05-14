@@ -18,6 +18,7 @@ const columns = [
   {
     id: "fantasy_name",
     header: "Nome Fantasia",
+    enableColumnFilter: true,
     cell: ({ row }: { row: Company }) => row.fantasy_name ?? "—",
   },
   {
@@ -47,7 +48,7 @@ const columns = [
     cell: () => (
       <div className="flex items-center gap-1">
         <button
-          className="p-2 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer"
+          className="p-1 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer"
           title="Editar"
         >
           <Icon name="edit" size={16} />
@@ -62,6 +63,8 @@ interface Props {
   fetchCompanies: (params?: {
     social_reason?: string;
     social_reason_op?: string;
+    fantasy_name?: string;
+    fantasy_name_op?: string;
     cnpj?: string;
     cnpj_op?: string;
   }) => Promise<Company[]>;
@@ -77,6 +80,8 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
       const result = await fetchCompanies({
         social_reason: nextFilters.social_reason,
         social_reason_op: nextFilters.social_reason_op,
+        fantasy_name: nextFilters.fantasy_name,
+        fantasy_name_op: nextFilters.fantasy_name_op,
         cnpj: nextFilters.cnpj,
         cnpj_op: nextFilters.cnpj_op,
       });

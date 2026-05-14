@@ -7,6 +7,8 @@ import { CedentesView } from "./_view";
 async function fetchCompanies(params?: {
   social_reason?: string;
   social_reason_op?: string;
+  fantasy_name?: string;
+  fantasy_name_op?: string;
   cnpj?: string;
   cnpj_op?: string;
 }): Promise<Company[]> {

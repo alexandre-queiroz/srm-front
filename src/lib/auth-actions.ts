@@ -32,6 +32,23 @@ export async function loginAction(
       path: "/",
     });
 
+    try {
+      const me = await apiFetchJson<{ id: string; name: string; email: string }>(
+        "/v1/auth/me",
+        {},
+        data.access_token,
+      );
+      cookieStore.set(COOKIE_NAMES.USER_INFO, JSON.stringify({ name: me.name, id: me.id }), {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: data.expires_in,
+        path: "/",
+      });
+    } catch {
+      // non-critical — layout falls back to "SRM"
+    }
+
     return { success: true };
   } catch (err) {
     if (err instanceof ApiResponseError) {
@@ -46,4 +63,5 @@ export async function loginAction(
 export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAMES.AUTH_TOKEN);
+  cookieStore.delete(COOKIE_NAMES.USER_INFO);
 }

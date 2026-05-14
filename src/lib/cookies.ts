@@ -4,6 +4,7 @@
 
 export const COOKIE_NAMES = {
   AUTH_TOKEN: "srm_token",
+  USER_INFO: "srm_user",
 } as const;
 
 interface CookieOptions {
