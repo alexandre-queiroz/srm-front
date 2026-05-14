@@ -18,6 +18,7 @@ const columns = [
   {
     id: "fantasy_name",
     header: "Nome Fantasia",
+    enableColumnFilter: true,
     cell: ({ row }: { row: Company }) => row.fantasy_name ?? "—",
   },
   {
@@ -62,6 +63,8 @@ interface Props {
   fetchCompanies: (params?: {
     social_reason?: string;
     social_reason_op?: string;
+    fantasy_name?: string;
+    fantasy_name_op?: string;
     cnpj?: string;
     cnpj_op?: string;
   }) => Promise<Company[]>;
@@ -77,6 +80,8 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
       const result = await fetchCompanies({
         social_reason: nextFilters.social_reason,
         social_reason_op: nextFilters.social_reason_op,
+        fantasy_name: nextFilters.fantasy_name,
+        fantasy_name_op: nextFilters.fantasy_name_op,
         cnpj: nextFilters.cnpj,
         cnpj_op: nextFilters.cnpj_op,
       });
