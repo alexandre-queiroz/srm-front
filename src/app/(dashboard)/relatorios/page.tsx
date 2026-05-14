@@ -1,7 +1,8 @@
 import { getAuthToken } from "@/lib/server-auth";
 import { safeCall } from "@/lib/safe-call";
 import { getSettlementBatchReport } from "@/repositories/report-repository";
-import type { SettlementBatchReport } from "@/types";
+import { listCompanies } from "@/repositories/company-repository";
+import type { SettlementBatchReport, Company } from "@/types";
 import { RelatoriosView } from "./_view";
 
 const EMPTY_FALLBACK: SettlementBatchReport = {
@@ -26,6 +27,12 @@ async function fetchReport(params?: Parameters<typeof getSettlementBatchReport>[
   return getSettlementBatchReport(token, params);
 }
 
+async function fetchCompanies(social_reason?: string): Promise<Company[]> {
+  "use server";
+  const token = await getAuthToken();
+  return listCompanies(token, { social_reason, limit: 50 });
+}
+
 export default async function RelatoriosPage() {
   const initialData = await safeCall(
     () => fetchReport({ page: 1, page_size: 20 }),
@@ -36,6 +43,7 @@ export default async function RelatoriosPage() {
     <RelatoriosView
       initialData={initialData}
       fetchReport={fetchReport}
+      fetchCompanies={fetchCompanies}
     />
   );
 }

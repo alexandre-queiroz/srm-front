@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useTransition, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Icon from "@/components/ui/icon";
 import Button from "@/components/ui/button";
@@ -8,7 +8,8 @@ import { DataTable } from "@/components/ui/data-table";
 import Card from "@/components/ui/card";
 import Kpi from "@/components/ui/kpi";
 import Badge from "@/components/ui/badge";
-import type { SettlementBatchReport, SettlementBatchItem, SettlementTransactionItem } from "@/types";
+import { useDebounce } from "@/hooks/use-debounce";
+import type { SettlementBatchReport, SettlementBatchItem, SettlementTransactionItem, Company } from "@/types";
 import { toast } from "sonner";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -193,23 +194,67 @@ function BatchCard({ batch, defaultOpen }: BatchCardProps) {
 interface Props {
   initialData: SettlementBatchReport;
   fetchReport: (params?: Parameters<typeof import("@/repositories/report-repository").getSettlementBatchReport>[1]) => Promise<SettlementBatchReport>;
+  fetchCompanies: (social_reason?: string) => Promise<Company[]>;
 }
 
-export function RelatoriosView({ initialData, fetchReport }: Props) {
+export function RelatoriosView({ initialData, fetchReport, fetchCompanies }: Props) {
   const [data, setData] = useState<SettlementBatchReport>(initialData);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [assignorId, setAssignorId] = useState<string | undefined>();
+  const [assignorName, setAssignorName] = useState("");
+  const [assignorSearch, setAssignorSearch] = useState("");
+  const [assignorResults, setAssignorResults] = useState<Company[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const assignorRef = useRef<HTMLDivElement>(null);
+  const debouncedSearch = useDebounce(assignorSearch, 300);
   const [isPending, startTransition] = useTransition();
 
-  const load = (params?: { page?: number; start_date?: string; end_date?: string }) => {
-    const resolvedStart = params?.start_date ?? (startDate || undefined);
-    const resolvedEnd   = params?.end_date   ?? (endDate   || undefined);
+  useEffect(() => {
+    if (!debouncedSearch.trim()) { setAssignorResults([]); return; }
+    let cancelled = false;
+    setIsSearching(true);
+    fetchCompanies(debouncedSearch)
+      .then((r) => { if (!cancelled) { setAssignorResults(r); setDropdownOpen(true); } })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setIsSearching(false); });
+    return () => { cancelled = true; };
+  }, [debouncedSearch, fetchCompanies]);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (assignorRef.current && !assignorRef.current.contains(e.target as Node)) setDropdownOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  const selectAssignor = (company: Company) => {
+    setAssignorId(company.id);
+    setAssignorName(company.social_reason);
+    setAssignorSearch(company.social_reason);
+    setDropdownOpen(false);
+  };
+
+  const clearAssignor = () => {
+    setAssignorId(undefined);
+    setAssignorName("");
+    setAssignorSearch("");
+    setAssignorResults([]);
+  };
+
+  const load = (params?: { page?: number; start_date?: string; end_date?: string; assignor_id?: string }) => {
+    const resolvedStart      = params?.start_date  ?? (startDate  || undefined);
+    const resolvedEnd        = params?.end_date    ?? (endDate    || undefined);
+    const resolvedAssignorId = params?.assignor_id ?? (assignorId || undefined);
     startTransition(async () => {
       try {
         const result = await fetchReport({
           page: params?.page ?? 1,
-          start_date: resolvedStart ? `${resolvedStart}T00:00:00` : undefined,
-          end_date:   resolvedEnd   ? `${resolvedEnd}T23:59:59`   : undefined,
+          start_date:  resolvedStart      ? `${resolvedStart}T00:00:00`  : undefined,
+          end_date:    resolvedEnd        ? `${resolvedEnd}T23:59:59`    : undefined,
+          assignor_id: resolvedAssignorId,
         });
         setData(result);
       } catch {
@@ -218,7 +263,7 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
     });
   };
 
-  const handleApply = () => load({ page: 1, start_date: startDate || undefined, end_date: endDate || undefined });
+  const handleApply = () => load({ page: 1, start_date: startDate || undefined, end_date: endDate || undefined, assignor_id: assignorId });
 
   const handleExportCSV = () => {
     const rows: string[][] = [
@@ -307,15 +352,52 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
             className="h-9 rounded-xl border-[0.5px] border-border-default bg-white px-3 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
           />
         </div>
-        <Button onClick={handleApply} isLoading={isPending} icon="search" className="h-9 px-4 text-xs font-bold">
+        <div className="flex flex-col gap-1 relative" ref={assignorRef}>
+          <label className="text-[11px] font-semibold text-fg-3 uppercase tracking-wider">Cedente</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar cedente..."
+              value={assignorSearch}
+              onChange={(e) => { setAssignorSearch(e.target.value); if (!e.target.value) clearAssignor(); }}
+              onFocus={() => { if (assignorResults.length > 0) setDropdownOpen(true); }}
+              className="h-9 w-52 rounded-xl border-[0.5px] border-border-default bg-white pl-3 pr-8 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
+            />
+            {isSearching ? (
+              <Icon name="loader" size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-3 animate-spin" />
+            ) : assignorId ? (
+              <button type="button" onClick={clearAssignor} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-3 hover:text-fg-1">
+                <Icon name="x" size={14} />
+              </button>
+            ) : null}
+            {dropdownOpen && assignorResults.length > 0 && (
+              <div className="absolute top-full mt-1 left-0 z-50 w-72 bg-white border-[0.5px] border-border-default rounded-xl shadow-lg overflow-hidden">
+                {assignorResults.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectAssignor(c)}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-surface-alt transition-colors flex flex-col"
+                  >
+                    <span className="font-medium text-fg-1 truncate">{c.social_reason}</span>
+                    <span className="text-xs text-fg-3 font-mono">{c.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Button onClick={handleApply} isLoading={isPending} icon="search" className="h-9 px-4 text-xs font-bold self-end">
           Filtrar
         </Button>
-        {(startDate || endDate) && (
+        {(startDate || endDate || assignorId) && (
           <Button
             variant="outline"
             color="neutral"
-            className="h-9 px-3 text-xs"
-            onClick={() => { setStartDate(""); setEndDate(""); load({ page: 1, start_date: undefined, end_date: undefined }); }}
+            className="h-9 px-3 text-xs self-end"
+            onClick={() => { setStartDate(""); setEndDate(""); clearAssignor(); load({ page: 1, start_date: undefined, end_date: undefined, assignor_id: undefined }); }}
           >
             Limpar
           </Button>
