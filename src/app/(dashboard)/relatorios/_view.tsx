@@ -40,7 +40,7 @@ const txnColumns = [
     id: "invoice_key",
     header: "Chave NF-e",
     cell: ({ row }: { row: SettlementTransactionItem }) => (
-      <span className="font-mono text-xs text-fg-2" title={row.invoice_key}>
+      <span className="text-fg-2 font-mono text-xs" title={row.invoice_key}>
         {row.invoice_key.slice(0, 22)}…
       </span>
     ),
@@ -48,16 +48,12 @@ const txnColumns = [
   {
     id: "installment_number",
     header: "Parcela",
-    cell: ({ row }: { row: SettlementTransactionItem }) => (
-      <span className="font-medium">{row.installment_number}</span>
-    ),
+    cell: ({ row }: { row: SettlementTransactionItem }) => <span className="font-medium">{row.installment_number}</span>,
   },
   {
     id: "drawee_name",
     header: "Sacado",
-    cell: ({ row }: { row: SettlementTransactionItem }) => (
-      <span title={fmtCNPJ(row.drawee_cnpj)}>{row.drawee_name}</span>
-    ),
+    cell: ({ row }: { row: SettlementTransactionItem }) => <span title={fmtCNPJ(row.drawee_cnpj)}>{row.drawee_name}</span>,
   },
   {
     id: "instrument_currency",
@@ -71,14 +67,12 @@ const txnColumns = [
   {
     id: "face_value",
     header: "Vlr. Face",
-    cell: ({ row }: { row: SettlementTransactionItem }) =>
-      Number(row.face_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+    cell: ({ row }: { row: SettlementTransactionItem }) => Number(row.face_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
   },
   {
     id: "face_value_brl",
     header: "Vlr. Face BRL",
-    cell: ({ row }: { row: SettlementTransactionItem }) =>
-      row.instrument_currency !== "BRL" ? fmtBRL(row.face_value_brl) : "—",
+    cell: ({ row }: { row: SettlementTransactionItem }) => (row.instrument_currency !== "BRL" ? fmtBRL(row.face_value_brl) : "—"),
   },
   {
     id: "present_value",
@@ -137,29 +131,29 @@ function BatchCard({ batch, defaultOpen }: BatchCardProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-surface-alt/40 transition-colors"
+        className="hover:bg-surface-alt/40 flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors"
       >
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-fg-1 text-sm truncate">{batch.assignor_name}</span>
-              <span className="text-fg-3 text-xs font-mono">{fmtCNPJ(batch.assignor_cnpj)}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-fg-1 truncate text-sm font-semibold">{batch.assignor_name}</span>
+              <span className="text-fg-3 font-mono text-xs">{fmtCNPJ(batch.assignor_cnpj)}</span>
               <Badge color="success" variant="soft" size="sm" dot>
                 LIQUIDADO
               </Badge>
             </div>
-            <div className="flex items-center gap-4 mt-2 flex-wrap">
+            <div className="mt-2 flex flex-wrap items-center gap-4">
               {chips.map((c) => (
                 <span key={c.label} className="flex items-center gap-1 text-xs">
                   <span className="text-fg-3">{c.label}:</span>
-                  <span className="font-medium text-fg-1">{c.value}</span>
+                  <span className="text-fg-1 font-medium">{c.value}</span>
                 </span>
               ))}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="text-xs text-fg-3">{fmtDate(batch.processed_at)}</span>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="text-fg-3 text-xs">{fmtDate(batch.processed_at)}</span>
           <Icon
             name="chevronDown"
             size={16}
@@ -171,7 +165,7 @@ function BatchCard({ batch, defaultOpen }: BatchCardProps) {
 
       {/* Collapsible transaction table */}
       {open && (
-        <div className="border-t border-border-default px-5 pb-5 pt-4">
+        <div className="border-border-default border-t px-5 pt-4 pb-5">
           <DataTable
             columns={txnColumns}
             data={batch.transactions}
@@ -193,7 +187,9 @@ function BatchCard({ batch, defaultOpen }: BatchCardProps) {
 
 interface Props {
   initialData: SettlementBatchReport;
-  fetchReport: (params?: Parameters<typeof import("@/repositories/report-repository").getSettlementBatchReport>[1]) => Promise<SettlementBatchReport>;
+  fetchReport: (
+    params?: Parameters<typeof import("@/repositories/report-repository").getSettlementBatchReport>[1],
+  ) => Promise<SettlementBatchReport>;
   fetchCompanies: (social_reason?: string) => Promise<Company[]>;
 }
 
@@ -212,14 +208,33 @@ export function RelatoriosView({ initialData, fetchReport, fetchCompanies }: Pro
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!debouncedSearch.trim()) { setAssignorResults([]); return; }
     let cancelled = false;
-    setIsSearching(true);
-    fetchCompanies(debouncedSearch)
-      .then((r) => { if (!cancelled) { setAssignorResults(r); setDropdownOpen(true); } })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setIsSearching(false); });
-    return () => { cancelled = true; };
+    if (!debouncedSearch.trim()) {
+      Promise.resolve().then(() => {
+        if (!cancelled) setAssignorResults([]);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      setIsSearching(true);
+      fetchCompanies(debouncedSearch)
+        .then((r) => {
+          if (!cancelled) {
+            setAssignorResults(r);
+            setDropdownOpen(true);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) setIsSearching(false);
+        });
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedSearch, fetchCompanies]);
 
   useEffect(() => {
@@ -245,15 +260,15 @@ export function RelatoriosView({ initialData, fetchReport, fetchCompanies }: Pro
   };
 
   const load = (params?: { page?: number; start_date?: string; end_date?: string; assignor_id?: string }) => {
-    const resolvedStart      = params?.start_date  ?? (startDate  || undefined);
-    const resolvedEnd        = params?.end_date    ?? (endDate    || undefined);
+    const resolvedStart = params?.start_date ?? (startDate || undefined);
+    const resolvedEnd = params?.end_date ?? (endDate || undefined);
     const resolvedAssignorId = params?.assignor_id ?? (assignorId || undefined);
     startTransition(async () => {
       try {
         const result = await fetchReport({
           page: params?.page ?? 1,
-          start_date:  resolvedStart      ? `${resolvedStart}T00:00:00`  : undefined,
-          end_date:    resolvedEnd        ? `${resolvedEnd}T23:59:59`    : undefined,
+          start_date: resolvedStart ? `${resolvedStart}T00:00:00` : undefined,
+          end_date: resolvedEnd ? `${resolvedEnd}T23:59:59` : undefined,
           assignor_id: resolvedAssignorId,
         });
         setData(result);
@@ -267,8 +282,25 @@ export function RelatoriosView({ initialData, fetchReport, fetchCompanies }: Pro
 
   const handleExportCSV = () => {
     const rows: string[][] = [
-      ["Lote", "Cedente", "CNPJ Cedente", "Processado em", "NF-e", "Parcela", "Sacado", "CNPJ Sacado",
-       "Moeda", "Vlr. Face", "Vlr. Face BRL", "Vlr. Líquido", "Câmbio", "Prazo (d)", "Taxa Base", "Spread", "Liquidado em"],
+      [
+        "Lote",
+        "Cedente",
+        "CNPJ Cedente",
+        "Processado em",
+        "NF-e",
+        "Parcela",
+        "Sacado",
+        "CNPJ Sacado",
+        "Moeda",
+        "Vlr. Face",
+        "Vlr. Face BRL",
+        "Vlr. Líquido",
+        "Câmbio",
+        "Prazo (d)",
+        "Taxa Base",
+        "Spread",
+        "Liquidado em",
+      ],
     ];
     for (const batch of data.items) {
       for (const t of batch.transactions) {
@@ -313,144 +345,158 @@ export function RelatoriosView({ initialData, fetchReport, fetchCompanies }: Pro
   ];
 
   return (
-    <div className="h-full overflow-y-auto overflow-x-hidden">
-    <div className="flex flex-col gap-6 pb-12">
-      {/* Page header */}
-      <div className="flex items-end justify-between shrink-0">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Extrato de Liquidação</h1>
-          <p className="t-body !text-fg-3 mt-0.5">Lotes aprovados com seus títulos liquidados.</p>
-        </motion.div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" color="neutral" icon="download" onClick={handleExportCSV} disabled={items.length === 0}>
-            Exportar CSV
-          </Button>
-          <Button icon="refresh-cw" onClick={() => load({ page })} isLoading={isPending}>
-            Atualizar
-          </Button>
-        </div>
-      </div>
-
-      {/* Date range filter */}
-      <div className="flex items-end gap-3 shrink-0">
-        <div className="flex flex-col gap-1">
-          <label className="text-[11px] font-semibold text-fg-3 uppercase tracking-wider">De</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="h-9 rounded-xl border-[0.5px] border-border-default bg-white px-3 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-[11px] font-semibold text-fg-3 uppercase tracking-wider">Até</label>
-          <input
-            type="date"
-            value={endDate}
-            min={startDate || undefined}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="h-9 rounded-xl border-[0.5px] border-border-default bg-white px-3 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
-          />
-        </div>
-        <div className="flex flex-col gap-1 relative" ref={assignorRef}>
-          <label className="text-[11px] font-semibold text-fg-3 uppercase tracking-wider">Cedente</label>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar cedente..."
-              value={assignorSearch}
-              onChange={(e) => { setAssignorSearch(e.target.value); if (!e.target.value) clearAssignor(); }}
-              onFocus={() => { if (assignorResults.length > 0) setDropdownOpen(true); }}
-              className="h-9 w-52 rounded-xl border-[0.5px] border-border-default bg-white pl-3 pr-8 text-[13px] text-fg-1 outline-none focus:border-brand-blue-500 transition-colors shadow-xs"
-            />
-            {isSearching ? (
-              <Icon name="loader" size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-3 animate-spin" />
-            ) : assignorId ? (
-              <button type="button" onClick={clearAssignor} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-3 hover:text-fg-1">
-                <Icon name="x" size={14} />
-              </button>
-            ) : null}
-            {dropdownOpen && assignorResults.length > 0 && (
-              <div className="absolute top-full mt-1 left-0 z-50 w-72 bg-white border-[0.5px] border-border-default rounded-xl shadow-lg overflow-hidden">
-                {assignorResults.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => selectAssignor(c)}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-surface-alt transition-colors flex flex-col"
-                  >
-                    <span className="font-medium text-fg-1 truncate">{c.social_reason}</span>
-                    <span className="text-xs text-fg-3 font-mono">{c.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+    <div className="h-full overflow-x-hidden overflow-y-auto">
+      <div className="flex flex-col gap-6 pb-12">
+        {/* Page header */}
+        <div className="flex shrink-0 items-end justify-between">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <h1 className="t-h3 text-fg-1 !text-2xl tracking-tight">Extrato de Liquidação</h1>
+            <p className="t-body !text-fg-3 mt-0.5">Lotes aprovados com seus títulos liquidados.</p>
+          </motion.div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" color="neutral" icon="download" onClick={handleExportCSV} disabled={items.length === 0}>
+              Exportar CSV
+            </Button>
+            <Button icon="refresh-cw" onClick={() => load({ page })} isLoading={isPending}>
+              Atualizar
+            </Button>
           </div>
         </div>
 
-        <Button onClick={handleApply} isLoading={isPending} icon="search" className="h-9 px-4 text-xs font-bold self-end">
-          Filtrar
-        </Button>
-        {(startDate || endDate || assignorId) && (
-          <Button
-            variant="outline"
-            color="neutral"
-            className="h-9 px-3 text-xs self-end"
-            onClick={() => { setStartDate(""); setEndDate(""); clearAssignor(); load({ page: 1, start_date: undefined, end_date: undefined, assignor_id: undefined }); }}
-          >
-            Limpar
-          </Button>
-        )}
-      </div>
+        {/* Date range filter */}
+        <div className="flex shrink-0 items-end gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-fg-3 text-[11px] font-semibold tracking-wider uppercase">De</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border-border-default text-fg-1 focus:border-brand-blue-500 h-9 rounded-xl border-[0.5px] bg-white px-3 text-[13px] shadow-xs transition-colors outline-none"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-fg-3 text-[11px] font-semibold tracking-wider uppercase">Até</label>
+            <input
+              type="date"
+              value={endDate}
+              min={startDate || undefined}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border-border-default text-fg-1 focus:border-brand-blue-500 h-9 rounded-xl border-[0.5px] bg-white px-3 text-[13px] shadow-xs transition-colors outline-none"
+            />
+          </div>
+          <div className="relative flex flex-col gap-1" ref={assignorRef}>
+            <label className="text-fg-3 text-[11px] font-semibold tracking-wider uppercase">Cedente</label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar cedente..."
+                value={assignorSearch}
+                onChange={(e) => {
+                  setAssignorSearch(e.target.value);
+                  if (!e.target.value) clearAssignor();
+                }}
+                onFocus={() => {
+                  if (assignorResults.length > 0) setDropdownOpen(true);
+                }}
+                className="border-border-default text-fg-1 focus:border-brand-blue-500 h-9 w-52 rounded-xl border-[0.5px] bg-white pr-8 pl-3 text-[13px] shadow-xs transition-colors outline-none"
+              />
+              {isSearching ? (
+                <Icon name="loader" size={14} className="text-fg-3 absolute top-1/2 right-2.5 -translate-y-1/2 animate-spin" />
+              ) : assignorId ? (
+                <button
+                  type="button"
+                  onClick={clearAssignor}
+                  className="text-fg-3 hover:text-fg-1 absolute top-1/2 right-2.5 -translate-y-1/2"
+                >
+                  <Icon name="x" size={14} />
+                </button>
+              ) : null}
+              {dropdownOpen && assignorResults.length > 0 && (
+                <div className="border-border-default absolute top-full left-0 z-50 mt-1 w-72 overflow-hidden rounded-xl border-[0.5px] bg-white shadow-lg">
+                  {assignorResults.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => selectAssignor(c)}
+                      className="hover:bg-surface-alt flex w-full flex-col px-4 py-2.5 text-left text-sm transition-colors"
+                    >
+                      <span className="text-fg-1 truncate font-medium">{c.social_reason}</span>
+                      <span className="text-fg-3 font-mono text-xs">
+                        {c.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-        {kpis.map((k) => (
-          <Kpi key={k.label} label={k.label} value={k.value} />
-        ))}
-      </div>
-
-      {/* Batch list */}
-      <div className="flex flex-col gap-3 flex-1">
-        {items.length === 0 ? (
-          <Card padding={32} className="items-center justify-center text-fg-3 text-sm">
-            Nenhum lote liquidado encontrado.
-          </Card>
-        ) : (
-          items.map((batch, idx) => (
-            <BatchCard key={batch.batch_id} batch={batch} defaultOpen={idx === 0} />
-          ))
-        )}
-      </div>
-
-      {/* Batch-level pagination */}
-      {total_pages > 1 && (
-        <div className="flex items-center justify-end gap-2 shrink-0 pt-1">
-          <Button
-            variant="outline"
-            color="neutral"
-            onClick={() => load({ page: page - 1 })}
-            disabled={page <= 1 || isPending}
-            className="h-8 w-8 p-0 min-w-0 rounded-full"
-          >
-            <Icon name="arrowLeft" size={14} />
+          <Button onClick={handleApply} isLoading={isPending} icon="search" className="h-9 self-end px-4 text-xs font-bold">
+            Filtrar
           </Button>
-          <span className="text-[13px] font-medium text-fg-1 px-3">
-            Página {page} de {total_pages}
-          </span>
-          <Button
-            variant="outline"
-            color="neutral"
-            onClick={() => load({ page: page + 1 })}
-            disabled={page >= total_pages || isPending}
-            className="h-8 w-8 p-0 min-w-0 rounded-full"
-          >
-            <Icon name="arrowRight" size={14} />
-          </Button>
+          {(startDate || endDate || assignorId) && (
+            <Button
+              variant="outline"
+              color="neutral"
+              className="h-9 self-end px-3 text-xs"
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+                clearAssignor();
+                load({ page: 1, start_date: undefined, end_date: undefined, assignor_id: undefined });
+              }}
+            >
+              Limpar
+            </Button>
+          )}
         </div>
-      )}
-    </div>
+
+        {/* KPI cards */}
+        <div className="grid shrink-0 grid-cols-1 gap-4 md:grid-cols-4">
+          {kpis.map((k) => (
+            <Kpi key={k.label} label={k.label} value={k.value} />
+          ))}
+        </div>
+
+        {/* Batch list */}
+        <div className="flex flex-1 flex-col gap-3">
+          {items.length === 0 ? (
+            <Card padding={32} className="text-fg-3 items-center justify-center text-sm">
+              Nenhum lote liquidado encontrado.
+            </Card>
+          ) : (
+            items.map((batch, idx) => <BatchCard key={batch.batch_id} batch={batch} defaultOpen={idx === 0} />)
+          )}
+        </div>
+
+        {/* Batch-level pagination */}
+        {total_pages > 1 && (
+          <div className="flex shrink-0 items-center justify-end gap-2 pt-1">
+            <Button
+              variant="outline"
+              color="neutral"
+              onClick={() => load({ page: page - 1 })}
+              disabled={page <= 1 || isPending}
+              className="h-8 w-8 min-w-0 rounded-full p-0"
+            >
+              <Icon name="arrowLeft" size={14} />
+            </Button>
+            <span className="text-fg-1 px-3 text-[13px] font-medium">
+              Página {page} de {total_pages}
+            </span>
+            <Button
+              variant="outline"
+              color="neutral"
+              onClick={() => load({ page: page + 1 })}
+              disabled={page >= total_pages || isPending}
+              className="h-8 w-8 min-w-0 rounded-full p-0"
+            >
+              <Icon name="arrowRight" size={14} />
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

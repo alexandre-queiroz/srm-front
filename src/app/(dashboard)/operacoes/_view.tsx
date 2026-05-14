@@ -28,9 +28,7 @@ const columns = [
     id: "invoice_key",
     header: "Chave NF-e",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Receivable }) => (
-      <span className="truncate max-w-[260px] block">{row.invoice_key}</span>
-    ),
+    cell: ({ row }: { row: Receivable }) => <span className="block max-w-[260px] truncate">{row.invoice_key}</span>,
   },
   {
     id: "assignor",
@@ -45,8 +43,7 @@ const columns = [
   {
     id: "due_date",
     header: "Vencimento",
-    cell: ({ row }: { row: Receivable }) =>
-      new Date(row.due_date + "T00:00:00").toLocaleDateString("pt-BR"),
+    cell: ({ row }: { row: Receivable }) => new Date(row.due_date + "T00:00:00").toLocaleDateString("pt-BR"),
   },
   {
     id: "face_value",
@@ -79,7 +76,14 @@ interface Props {
   initialTotal: number;
   productTypes: ProductType[];
   currencies: Currency[];
-  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; invoice_key_op?: string; assignor_id?: string }) => Promise<Page<Receivable>>;
+  fetchReceivables: (params: {
+    page: number;
+    pageSize: number;
+    status?: string;
+    invoice_key?: string;
+    invoice_key_op?: string;
+    assignor_id?: string;
+  }) => Promise<Page<Receivable>>;
   uploadXml: (formData: FormData) => Promise<ReceivableUploadResult>;
 }
 
@@ -88,7 +92,7 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
   const [total, setTotal] = useState(initialTotal);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
-  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
 
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -100,14 +104,14 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
   const fileRef = useRef<HTMLInputElement>(null);
 
   const loadPage = useCallback(
-    (nextPage: number, nextSize: number, nextFilters: any = filters) => {
+    (nextPage: number, nextSize: number, nextFilters: Record<string, string> = filters) => {
       startTransition(async () => {
         const raw = await fetchReceivables({
           page: nextPage + 1,
           pageSize: nextSize,
           ...nextFilters,
         });
-        const result = Array.isArray(raw) ? { items: raw, total: (raw as any).length } : raw;
+        const result = Array.isArray(raw) ? { items: raw, total: raw.length } : raw;
         setData(result.items);
         setTotal(result.total);
       });
@@ -155,8 +159,8 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
       setUploadResult(result);
       loadPage(0, pageSize);
       toast.success(`${result.imported} recebível(is) importado(s) com sucesso.`);
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao importar XML.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao importar XML.");
     } finally {
       setIsUploading(false);
     }
@@ -176,17 +180,13 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
   const currencyOptions = currencies.map((c) => ({ value: c.code, label: `${c.code} — ${c.name}` }));
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-end justify-between shrink-0">
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex shrink-0 items-end justify-between">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Recebíveis</h1>
+          <h1 className="t-h3 text-fg-1 !text-2xl tracking-tight">Recebíveis</h1>
           <p className="t-body !text-fg-3 mt-0.5">Títulos disponíveis para antecipação.</p>
         </motion.div>
-        <Button
-          className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10"
-          icon="upload"
-          onClick={() => setUploadOpen(true)}
-        >
+        <Button className="shadow-brand-blue-500/10 h-9 px-4 text-xs font-bold shadow-md" icon="upload" onClick={() => setUploadOpen(true)}>
           Importar XML
         </Button>
       </div>
@@ -206,38 +206,38 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
         <ModalContent onClose={handleCloseUpload}>
           <ModalHeader>
             <ModalTitle>Importar NF-e XML</ModalTitle>
-            <ModalDescription>
-              Selecione um arquivo XML de NF-e para importar os recebíveis.
-            </ModalDescription>
+            <ModalDescription>Selecione um arquivo XML de NF-e para importar os recebíveis.</ModalDescription>
           </ModalHeader>
 
           {uploadResult ? (
-            <div className="px-6 pb-2 space-y-4">
-              <div className="rounded-2xl bg-srm-success-50 border border-srm-success-100 p-4 flex items-start gap-3">
-                <Icon name="checkCircle" size={20} className="text-srm-success-500 shrink-0 mt-0.5" />
+            <div className="space-y-4 px-6 pb-2">
+              <div className="bg-srm-success-50 border-srm-success-100 flex items-start gap-3 rounded-2xl border p-4">
+                <Icon name="checkCircle" size={20} className="text-srm-success-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-srm-success-700">Importação concluída</p>
-                  <p className="text-sm text-srm-success-600 mt-0.5">
+                  <p className="text-srm-success-700 text-sm font-semibold">Importação concluída</p>
+                  <p className="text-srm-success-600 mt-0.5 text-sm">
                     {uploadResult.imported} importado(s) · {uploadResult.skipped} ignorado(s) · {uploadResult.total} total
                   </p>
                 </div>
               </div>
               {uploadResult.items.some((i) => !i.success) && (
-                <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                  {uploadResult.items.filter((i) => !i.success).map((item, idx) => (
-                    <div key={idx} className="text-xs text-srm-danger-600 bg-srm-danger-50 rounded-lg px-3 py-1.5">
-                      {item.invoice_key} · {item.error}
-                    </div>
-                  ))}
+                <div className="max-h-40 space-y-1.5 overflow-y-auto">
+                  {uploadResult.items
+                    .filter((i) => !i.success)
+                    .map((item, idx) => (
+                      <div key={idx} className="text-srm-danger-600 bg-srm-danger-50 rounded-lg px-3 py-1.5 text-xs">
+                        {item.invoice_key} · {item.error}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
           ) : (
-            <form onSubmit={handleUpload} className="px-6 pb-2 space-y-4">
+            <form onSubmit={handleUpload} className="space-y-4 px-6 pb-2">
               <div>
-                <label className="text-[13px] font-medium text-fg-1 mb-1.5 block">Arquivo XML</label>
+                <label className="text-fg-1 mb-1.5 block text-[13px] font-medium">Arquivo XML</label>
                 <div
-                  className={`border-[0.5px] border-dashed rounded-2xl p-6 text-center transition-colors cursor-pointer ${selectedFileName ? "border-brand-blue-400 bg-brand-blue-50/40" : "border-border-strong hover:bg-surface-alt/30"}`}
+                  className={`cursor-pointer rounded-2xl border-[0.5px] border-dashed p-6 text-center transition-colors ${selectedFileName ? "border-brand-blue-400 bg-brand-blue-50/40" : "border-border-strong hover:bg-surface-alt/30"}`}
                   onClick={() => fileRef.current?.click()}
                 >
                   <Icon
@@ -247,13 +247,13 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
                   />
                   {selectedFileName ? (
                     <>
-                      <p className="text-sm text-brand-blue-700 font-semibold truncate max-w-xs mx-auto">{selectedFileName}</p>
-                      <p className="text-xs text-brand-blue-400 mt-0.5">Clique para trocar</p>
+                      <p className="text-brand-blue-700 mx-auto max-w-xs truncate text-sm font-semibold">{selectedFileName}</p>
+                      <p className="text-brand-blue-400 mt-0.5 text-xs">Clique para trocar</p>
                     </>
                   ) : (
                     <>
-                      <p className="text-sm text-fg-2 font-medium">Clique para selecionar</p>
-                      <p className="text-xs text-fg-3 mt-0.5">XML de NF-e · máx. 5 MB</p>
+                      <p className="text-fg-2 text-sm font-medium">Clique para selecionar</p>
+                      <p className="text-fg-3 mt-0.5 text-xs">XML de NF-e · máx. 5 MB</p>
                     </>
                   )}
                   <input
@@ -295,9 +295,7 @@ export function OperacoesView({ initialData, initialTotal, productTypes, currenc
 
           {uploadResult && (
             <ModalFooter>
-              <Button onClick={handleCloseUpload}>
-                Fechar
-              </Button>
+              <Button onClick={handleCloseUpload}>Fechar</Button>
             </ModalFooter>
           )}
         </ModalContent>
