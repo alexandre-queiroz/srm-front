@@ -268,7 +268,8 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
   ];
 
   return (
-    <div className="h-full flex flex-col gap-6">
+    <div className="h-full overflow-y-auto overflow-x-hidden">
+    <div className="flex flex-col gap-6 pb-12">
       {/* Page header */}
       <div className="flex items-end justify-between shrink-0">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
@@ -367,6 +368,7 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
           </Button>
         </div>
       )}
+    </div>
     </div>
   );
 }
