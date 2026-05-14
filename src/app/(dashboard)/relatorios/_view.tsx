@@ -59,8 +59,16 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
     });
   };
 
-  const fmtBRL = (v: string | number) => 
-    `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  const formatCurrency = (v: string | number, currency: string) => {
+    const symbols: Record<string, string> = {
+      BRL: "R$",
+      USD: "US$",
+      EUR: "€",
+      GBP: "£",
+    };
+    const symbol = symbols[currency] || currency;
+    return `${symbol} ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  };
 
   return (
     <div className="h-full flex flex-col gap-6">
@@ -77,10 +85,10 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Kpi label="Títulos Liquidados" value={data.summary.total_count} icon="file-text" color="brand" />
-        <Kpi label="Total Face" value={fmtBRL(data.summary.total_face_value_brl)} icon="dollar-sign" color="neutral" />
-        <Kpi label="Total Líquido" value={fmtBRL(data.summary.total_present_value_brl)} icon="trending-up" color="success" />
-        <Kpi label="Spread Médio" value={`${(Number(data.summary.average_spread) * 100).toFixed(4)}%`} icon="percent" color="warning" />
+        <Kpi label="Títulos Liquidados" value={String(data.summary.total_count)} />
+        <Kpi label="Total Face" value={formatCurrency(data.summary.total_face_value_brl, "BRL")} />
+        <Kpi label="Total Líquido" value={formatCurrency(data.summary.total_present_value_brl, "BRL")} />
+        <Kpi label="Spread Médio" value={`${(Number(data.summary.average_spread) * 100).toFixed(4)}%`} />
       </div>
 
       <DataTable 

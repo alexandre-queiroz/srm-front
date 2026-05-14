@@ -1,10 +1,17 @@
 import { getAuthToken } from "@/lib/server-auth";
 import { safeCall } from "@/lib/safe-call";
-import { listBatches, getBatch, createBatch, previewBatch, queueBatch, simulateBatch } from "@/repositories/batch-repository";
+import { listBatches, getBatch, createBatch, queueBatch, simulateBatch } from "@/repositories/batch-repository";
 import { listReceivables } from "@/repositories/receivable-repository";
 import { listCompanies } from "@/repositories/company-repository";
-import type { Batch, BatchDetail, Receivable, Company, BatchPreview } from "@/types";
+import { getCurrentRate } from "@/repositories/exchange-rate-repository";
+import type { Batch, BatchDetail, Receivable, Company, BatchPreview, ExchangeRate } from "@/types";
 import { LotesView } from "./_view";
+
+async function fetchCurrentRate(): Promise<ExchangeRate> {
+  "use server";
+  const token = await getAuthToken();
+  return getCurrentRate(token);
+}
 
 async function fetchBatches(params: { 
   page: number; 
@@ -80,6 +87,7 @@ export default async function LotesPage() {
       simulateBatch={simulateBatchAction}
       createAndQueueBatch={createAndQueueBatchAction}
       queueBatchAction={queueBatchAction}
+      fetchCurrentRate={fetchCurrentRate}
     />
   );
 }

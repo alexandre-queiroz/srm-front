@@ -51,8 +51,16 @@ const columns = [
   {
     id: "face_value",
     header: "Valor de Face",
-    cell: ({ row }: { row: Receivable }) =>
-      `${row.currency_code} ${Number(row.face_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+    cell: ({ row }: { row: Receivable }) => {
+      const symbols: Record<string, string> = {
+        BRL: "R$",
+        USD: "US$",
+        EUR: "€",
+        GBP: "£",
+      };
+      const symbol = symbols[row.currency_code] || row.currency_code;
+      return `${symbol} ${Number(row.face_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    },
   },
   {
     id: "status",

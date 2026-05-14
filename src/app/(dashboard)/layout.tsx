@@ -89,7 +89,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center h-10 px-3 rounded-xl transition-all duration-200 group",
+                        "flex items-center h-10 rounded-xl transition-all duration-200 group",
+                        isCollapsed ? "justify-center px-0" : "px-3",
                         isActive 
                           ? "bg-brand-blue-500 text-white shadow-lg shadow-brand-blue-500/20" 
                           : "text-brand-blue-100/60 hover:bg-white/5 hover:text-white"

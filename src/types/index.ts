@@ -55,6 +55,8 @@ export interface Batch {
   version: number;
   rejection_reasons: Record<string, unknown> | null;
   total_receivables: number;
+  total_face_value_brl: string;
+  total_present_value_brl: string;
   created_at: string;
   updated_at: string;
 }

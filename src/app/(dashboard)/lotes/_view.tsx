@@ -10,7 +10,7 @@ import Checkbox from "@/components/ui/checkbox";
 import { DataTable } from "@/components/ui/data-table";
 import Icon from "@/components/ui/icon";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from "@/components/ui/modal";
-import type { Batch, BatchDetail, BatchPreview, BatchPreviewItem, Company, Receivable } from "@/types";
+import type { Batch, BatchDetail, BatchPreview, BatchPreviewItem, Company, Receivable, ExchangeRate } from "@/types";
 
 // ─── Preview item card ────────────────────────────────────────────────────────
 
@@ -23,42 +23,109 @@ interface PreviewItemCardProps {
   spreadDaily: number | null;
   totalDaily: number | null;
   fmtPct: (r: number) => string;
-  fmtBRL: (v: string | number) => string;
+  formatCurrency: (v: string | number, currency: string) => string;
+  exchangeRate?: number | null;
 }
 
-function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily, totalDaily, fmtPct, fmtBRL }: PreviewItemCardProps) {
-  const baseDiscount = totalDaily != null && totalDaily > 0 && baseDaily != null
-    ? discount * (baseDaily / totalDaily) : null;
-  const spreadDiscount = totalDaily != null && totalDaily > 0 && spreadDaily != null
-    ? discount * (spreadDaily / totalDaily) : null;
+function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily, totalDaily, fmtPct, formatCurrency, exchangeRate }: PreviewItemCardProps) {
+  // 1. Normalize values. In approved batches, 'present' might already be in BRL 
+  // while 'face' is in the original currency (e.g. USD).
+  const nFace = Number(face);
+  let nPresent = Number(present);
+  const nExchange = Number(exchangeRate || 1);
 
-  const rows: { label: string; sub?: string; value: string; muted?: boolean; danger?: boolean }[] = [
-    { label: "Valor de Face", value: fmtBRL(face) },
-    { label: "Taxa Base", sub: baseDaily != null ? `${fmtPct(baseDaily)}/d` : undefined, value: baseDiscount != null ? `- ${fmtBRL(baseDiscount)}` : "—", danger: true },
-    { label: "Spread", sub: spreadDaily != null ? `${fmtPct(spreadDaily)}/d` : undefined, value: spreadDiscount != null ? `- ${fmtBRL(spreadDiscount)}` : "—", danger: true },
-    { label: "Desconto Total", sub: totalDaily != null ? `${fmtPct(totalDaily)}/d` : undefined, value: `- ${fmtBRL(discount)}`, danger: true, muted: true },
+  // Heuristic: if present value is much larger than face value and we have an exchange rate,
+  // it means 'present' is likely the BRL settlement value.
+  const isPresentAlreadyBRL = item.currency_code !== "BRL" && nPresent > nFace * 1.5;
+  
+  if (isPresentAlreadyBRL && nExchange > 0) {
+    nPresent = nPresent / nExchange;
+  }
+
+  const nDiscount = nFace - nPresent;
+
+  // 2. Calculate proportional discounts based on daily rates
+  const baseDiscount = totalDaily != null && totalDaily > 0 && baseDaily != null
+    ? nDiscount * (baseDaily / totalDaily) : 0;
+  const spreadDiscount = totalDaily != null && totalDaily > 0 && spreadDaily != null
+    ? nDiscount * (spreadDaily / totalDaily) : 0;
+
+  const rows: { label: string; sub?: string; value: string; muted?: boolean; danger?: boolean; bold?: boolean; highlight?: boolean }[] = [
+    { label: "Valor Bruto", value: formatCurrency(nFace, item.currency_code), bold: true },
   ];
 
+  if (item.currency_code !== "BRL" && nExchange > 1) {
+    rows.push({
+      label: "Câmbio",
+      sub: `@ ${nExchange.toFixed(4)}`,
+      value: formatCurrency(nFace * nExchange, "BRL"),
+      highlight: true,
+    });
+  }
+
+  rows.push(
+    { 
+      label: "Taxa Base", 
+      sub: baseDaily != null ? `${fmtPct(baseDaily)}/d` : undefined, 
+      value: `- ${formatCurrency(Math.abs(baseDiscount), item.currency_code)}`, 
+      danger: true 
+    },
+    { 
+      label: "Spread", 
+      sub: spreadDaily != null ? `${fmtPct(spreadDaily)}/d` : undefined, 
+      value: `- ${formatCurrency(Math.abs(spreadDiscount), item.currency_code)}`, 
+      danger: true 
+    },
+    { 
+      label: "Desconto Total", 
+      sub: totalDaily != null ? `${fmtPct(totalDaily)}/d` : undefined, 
+      value: `- ${formatCurrency(Math.abs(nDiscount), item.currency_code)}`, 
+      danger: true, 
+      muted: true 
+    },
+  );
+
   return (
-    <div className="border border-border-default rounded-xl overflow-hidden">
-      <div className="px-4 py-3 space-y-1.5">
-        <p className="text-sm font-semibold text-fg-1 leading-snug">{item.drawee.social_reason}</p>
-        <p className="text-xs text-fg-3">Parcela {item.installment_number} · {item.term_days}d</p>
-        <p className="font-mono text-[10px] text-fg-3 break-all leading-snug">{item.invoice_key}</p>
+    <div className="border border-border-default rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+      <div className="px-4 py-3 border-b border-border-subtle bg-surface-alt/10 flex justify-between items-start">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-fg-1 truncate">{item.drawee.social_reason}</p>
+          <p className="text-[10px] text-fg-3 uppercase tracking-wider font-semibold">
+            Parcela {item.installment_number} · {item.term_days} dias
+          </p>
+        </div>
+        <Badge variant="outline" color="neutral" className="font-mono text-[9px] px-1.5">{item.invoice_key.slice(-8)}</Badge>
       </div>
-      <div className="border-t border-border-subtle bg-surface-alt/30 px-4 py-3 space-y-2">
-        {rows.map(({ label, sub, value, danger, muted }) => (
-          <div key={label} className={`flex justify-between items-center ${muted ? "opacity-60" : ""}`}>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-fg-2">{label}</span>
-              {sub && <span className="text-[10px] text-fg-3 font-mono">{sub}</span>}
-            </div>
-            <span className={`text-xs font-semibold tabular-nums ${danger ? "text-srm-danger-500" : "text-fg-1"}`}>{value}</span>
+
+      <div className="px-4 py-3 space-y-2">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+          {rows.map(({ label, sub, value, danger, muted, bold, highlight }) => (
+            <React.Fragment key={label}>
+              <div className="flex items-baseline gap-1.5">
+                <span className={`text-[11px] ${bold ? "font-bold text-fg-1" : "text-fg-3"}`}>{label}</span>
+                {sub && <span className="text-[9px] text-fg-4 font-mono">{sub}</span>}
+              </div>
+              <div className="text-right">
+                <span className={`text-[11px] font-semibold tabular-nums ${danger ? "text-srm-danger-600" : highlight ? "text-brand-blue-600" : "text-fg-1"}`}>
+                  {value}
+                </span>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="mt-2 pt-2 border-t border-border-subtle flex justify-between items-center">
+          <span className="text-xs font-bold text-fg-1">Líquido a Receber</span>
+          <div className="text-right">
+            <p className="text-sm font-bold text-brand-blue-700 tabular-nums">
+              {formatCurrency(nPresent, item.currency_code)}
+            </p>
+            {item.currency_code !== "BRL" && nExchange > 1 && (
+              <p className="text-[10px] font-bold text-brand-blue-500/80">
+                {formatCurrency(nPresent * nExchange, "BRL")}
+              </p>
+            )}
           </div>
-        ))}
-        <div className="border-t border-border-subtle pt-2 flex justify-between items-center">
-          <span className="text-xs font-bold text-fg-1">Valor Líquido</span>
-          <span className="text-sm font-bold text-brand-blue-600 tabular-nums">{fmtBRL(present)}</span>
         </div>
       </div>
     </div>
@@ -157,7 +224,46 @@ const BATCH_STATUS_LABEL: Record<string, string> = {
 const batchColumns = [
   { id: "id", header: "ID", cell: ({ row }: { row: Batch }) => row.id },
   { id: "assignor", header: "Cedente", cell: ({ row }: { row: Batch }) => row.assignor.social_reason },
-  { id: "total_receivables", header: "Qtd. Títulos", cell: ({ row }: { row: Batch }) => row.total_receivables },
+  { id: "total_receivables", header: "Títulos", cell: ({ row }: { row: Batch }) => row.total_receivables },
+  {
+    id: "total_face_value_brl",
+    header: "Vlr. Bruto (BRL)",
+    cell: ({ row }: { row: Batch }) => {
+      const val = Number(row.total_face_value_brl);
+      return isNaN(val) || val === 0 ? "—" : `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    },
+  },
+  {
+    id: "total_present_value_brl",
+    header: "Vlr. Líquido (BRL)",
+    cell: ({ row }: { row: Batch }) => {
+      const val = Number(row.total_present_value_brl);
+      return val > 0 && !isNaN(val)
+        ? `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+        : "—";
+    },
+  },
+  {
+    id: "taxa",
+    header: "Taxa",
+    cell: ({ row }: { row: Batch }) => {
+      const face = Number(row.total_face_value_brl);
+      const present = Number(row.total_present_value_brl);
+      if (!face || !present || isNaN(face) || isNaN(present)) return "—";
+      return `${(((face - present) / face) * 100).toFixed(2)}%`;
+    },
+  },
+  {
+    id: "desconto",
+    header: "Desconto (BRL)",
+    cell: ({ row }: { row: Batch }) => {
+      const face = Number(row.total_face_value_brl);
+      const present = Number(row.total_present_value_brl);
+      if (!face || !present || isNaN(face) || isNaN(present)) return "—";
+      const discount = face - present;
+      return `- R$ ${discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    },
+  },
   {
     id: "status",
     header: "Status",
@@ -171,7 +277,15 @@ const batchColumns = [
     id: "created_at",
     header: "Criado em",
     cell: ({ row }: { row: Batch }) =>
-      new Date(row.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      new Date(row.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+  },
+  {
+    id: "processed_at",
+    header: "Processado em",
+    cell: ({ row }: { row: Batch }) =>
+      row.status === "approved"
+        ? new Date(row.updated_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+        : "—",
   },
 ];
 
@@ -186,6 +300,7 @@ interface Props {
   simulateBatch: (assignorId: string, receivableIds: string[]) => Promise<BatchPreview>;
   createAndQueueBatch: (assignorId: string, receivableIds: string[]) => Promise<Batch>;
   queueBatchAction: (batchId: string, expectedVersion: number) => Promise<Batch>;
+  fetchCurrentRate: () => Promise<ExchangeRate>;
 }
 
 // ─── Main view ────────────────────────────────────────────────────────────────
@@ -199,11 +314,27 @@ export function LotesView({
   simulateBatch,
   createAndQueueBatch,
   queueBatchAction,
+  fetchCurrentRate,
 }: Props) {
   const [data, setData] = useState(initialData);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [, startTransition] = useTransition();
+
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchCurrentRate()
+      .then(rate => {
+        if (mounted && rate?.rate) {
+          console.log("Exchange rate loaded:", rate.rate);
+          setExchangeRate(Number(rate.rate));
+        }
+      })
+      .catch((err) => console.error("Failed to fetch exchange rate:", err));
+    return () => { mounted = false; };
+  }, [fetchCurrentRate]);
 
   // Wizard state
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -242,8 +373,16 @@ export function LotesView({
     return () => { cancelled = true; };
   }, [debouncedSearch, fetchCompanies]);
 
-  const fmtBRL = (v: string | number) =>
-    `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  const formatCurrency = (v: string | number, currency: string) => {
+    const symbols: Record<string, string> = {
+      BRL: "R$",
+      USD: "US$",
+      EUR: "€",
+      GBP: "£",
+    };
+    const symbol = symbols[currency] || currency;
+    return `${symbol} ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  };
 
   // ── Page / table logic ──────────────────────────────────────────────────────
 
@@ -385,18 +524,44 @@ export function LotesView({
 
   function RatePanel({
     items,
-    totalFace,
-    totalPresent,
+    totalFace: _unusedTotalFace,
+    totalPresent: _unusedTotalPresent,
     totalReceivables,
+    exchangeRate,
   }: {
     items: BatchPreviewItem[];
     totalFace: number;
     totalPresent: number;
     totalReceivables: number;
+    exchangeRate: number | null;
   }) {
     const { baseRateAnnual, spreadAnnual, baseRateDaily, spreadDaily, totalRateDaily, fmtPct, fmtPctAnnual } =
       buildRatePanel(items);
-    const totalDiscount = totalFace - totalPresent;
+
+    const nExchange = Number(exchangeRate || 1);
+
+    // Calculate totals in BRL locally to ensure correct multi-currency sum
+    const totalFaceBRL = items.reduce((sum, item) => {
+      const value = Number(item.face_value);
+      return sum + (item.currency_code === "BRL" ? value : value * nExchange);
+    }, 0);
+
+    const totalPresentBRL = items.reduce((sum, item) => {
+      const face = Number(item.face_value);
+      let present = Number(item.present_value);
+      
+      // Normalization: if present is already in BRL (for approved batches), don't convert again
+      const isAlreadyBRL = item.currency_code !== "BRL" && present > face * 1.5;
+      
+      const valueBRL = (isAlreadyBRL || item.currency_code === "BRL") 
+        ? present 
+        : present * nExchange;
+        
+      return sum + valueBRL;
+    }, 0);
+
+    const totalDiscountBRL = totalFaceBRL - totalPresentBRL;
+
     return (
       <div className="rounded-2xl bg-brand-blue-950 text-white p-5 space-y-4 sticky top-0">
         <div>
@@ -424,11 +589,11 @@ export function LotesView({
           </div>
         </div>
         <div className="border-t border-white/10 pt-4 space-y-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300">Resumo</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300">Resumo (Total em BRL)</p>
           {[
             { label: "Títulos", value: String(totalReceivables) },
-            { label: "Valor de Face", value: fmtBRL(totalFace) },
-            { label: "Desconto Total", value: `- ${fmtBRL(totalDiscount)}`, danger: true },
+            { label: "Valor de Face", value: formatCurrency(totalFaceBRL, "BRL") },
+            { label: "Desconto Total", value: `- ${formatCurrency(totalDiscountBRL, "BRL")}`, danger: true },
           ].map(({ label, value, danger }) => (
             <div key={label} className="flex items-center justify-between">
               <span className="text-xs text-brand-blue-300">{label}</span>
@@ -436,8 +601,13 @@ export function LotesView({
             </div>
           ))}
           <div className="border-t border-white/10 pt-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300 mb-1">Valor Líquido</p>
-            <p className="text-2xl font-bold text-brand-blue-200">{fmtBRL(totalPresent)}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300 mb-1">Valor Líquido Total</p>
+            <p className="text-2xl font-bold text-brand-blue-200">{formatCurrency(totalPresentBRL, "BRL")}</p>
+            {items.some(i => i.currency_code !== "BRL") && (
+              <p className="text-[10px] text-brand-blue-400 mt-1 italic">
+                * Valores convertidos usando a taxa de câmbio atual.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -520,7 +690,8 @@ export function LotesView({
                             spreadDaily={iSpreadDaily}
                             totalDaily={iTotalDaily}
                             fmtPct={fmtPct}
-                            fmtBRL={fmtBRL}
+                            formatCurrency={formatCurrency}
+                            exchangeRate={exchangeRate}
                           />
                         );
                       })}
@@ -531,6 +702,7 @@ export function LotesView({
                         totalFace={totalFace}
                         totalPresent={totalPresent}
                         totalReceivables={detailBatch.total_receivables}
+                        exchangeRate={exchangeRate}
                       />
                     </div>
                   </div>
@@ -550,8 +722,8 @@ export function LotesView({
       </Modal>
 
       {/* ── Wizard modal ──────────────────────────────────────────────────── */}
-      <Modal open={wizardOpen} onOpenChange={handleCloseWizard} size={step === "preview" ? "xl" : "lg"}>
-        <ModalContent onClose={handleCloseWizard}>
+      <Modal open={wizardOpen} onOpenChange={handleCloseWizard} size="xl">
+        <ModalContent onClose={handleCloseWizard} className="h-[90vh]">
 
           {/* Stepper — hidden on success */}
           {step !== "success" && <WizardStepper step={step} />}
@@ -581,7 +753,7 @@ export function LotesView({
               </div>
 
               {/* Company list */}
-              <div className="px-6 pb-3 space-y-2 max-h-[340px] overflow-y-auto">
+              <div className="px-6 pt-1 pb-3 space-y-2 flex-1 overflow-y-auto">
                 {!assignorSearch.trim() ? (
                   <div className="flex flex-col items-center gap-2 py-8 text-center">
                     <Icon name="search" size={20} className="text-fg-disabled" />
@@ -629,7 +801,7 @@ export function LotesView({
                 </ModalDescription>
               </ModalHeader>
 
-              <div className="px-6 pb-3 max-h-[400px] overflow-y-auto space-y-1">
+              <div className="px-6 pb-3 flex-1 overflow-y-auto space-y-1">
                 {availableReceivables.length === 0 ? (
                   <p className="text-sm text-fg-3 py-8 text-center">Nenhum recebível disponível para este cedente.</p>
                 ) : (
@@ -641,10 +813,11 @@ export function LotesView({
                         onChange={toggleAll}
                       />
                       <span className="text-xs text-fg-3">
-                        {selectedReceivableIds.size} de {availableReceivables.length} · {fmtBRL(
+                        {selectedReceivableIds.size} de {availableReceivables.length} · {formatCurrency(
                           availableReceivables
                             .filter((r) => selectedReceivableIds.has(r.id))
                             .reduce((s, r) => s + Number(r.face_value), 0),
+                          "BRL"
                         )}
                       </span>
                     </div>
@@ -658,14 +831,17 @@ export function LotesView({
                         <div className="flex items-center gap-3 min-w-0">
                           <Checkbox checked={selectedReceivableIds.has(r.id)} onChange={() => toggleReceivable(r.id)} />
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-fg-1 truncate">{r.drawee.social_reason}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium text-fg-1 truncate">{r.drawee.social_reason}</p>
+                              <Badge color="neutral" size="sm">{r.product_type.name}</Badge>
+                            </div>
                             <p className="text-xs text-fg-3">
-                              Venc. {new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR")} · {r.invoice_key.slice(0, 16)}…
+                              Venc. {new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR")} · Spread {(Number(r.product_type.spread) * 100).toFixed(2)}% a.a. · {r.invoice_key.slice(0, 16)}…
                             </p>
                           </div>
                         </div>
                         <span className="text-sm font-semibold text-fg-1 whitespace-nowrap ml-4">
-                          {fmtBRL(r.face_value)}
+                          {formatCurrency(r.face_value, r.currency_code)}
                         </span>
                       </div>
                     ))}
@@ -702,9 +878,9 @@ export function LotesView({
                   </ModalDescription>
                 </ModalHeader>
 
-                <div className="px-6 pb-2">
-                  <div className="flex gap-5 items-start">
-                    <div className="flex-[3] min-w-0 space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                <div className="px-6 pb-2 flex-1 overflow-hidden">
+                  <div className="flex gap-5 h-full">
+                    <div className="flex-[3] min-w-0 space-y-2 overflow-y-auto pr-1">
                       {preview.items.map((item) => {
                         const face = Number(item.face_value);
                         const present = Number(item.present_value);
@@ -724,17 +900,19 @@ export function LotesView({
                             spreadDaily={iSpreadDaily}
                             totalDaily={iTotalDaily}
                             fmtPct={fmtPct}
-                            fmtBRL={fmtBRL}
+                            formatCurrency={formatCurrency}
+                            exchangeRate={exchangeRate}
                           />
                         );
                       })}
                     </div>
-                    <div className="flex-[2] min-w-0">
+                    <div className="flex-[2] min-w-0 overflow-y-auto">
                       <RatePanel
                         items={preview.items}
                         totalFace={totalFace}
                         totalPresent={totalPresent}
                         totalReceivables={preview.total_receivables}
+                        exchangeRate={exchangeRate}
                       />
                     </div>
                   </div>
@@ -750,23 +928,18 @@ export function LotesView({
 
           {/* ── Step 4: Success ─────────────────────────────────────────── */}
           {step === "success" && (
-            <>
-              <ModalHeader>
-                <ModalTitle>Solicitação Enviada</ModalTitle>
-              </ModalHeader>
-              <div className="px-6 pb-6 flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-srm-success-50 border border-srm-success-100 flex items-center justify-center">
-                  <Icon name="checkCircle" size={32} className="text-srm-success-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-fg-1">Lote enviado para processamento</p>
-                  <p className="text-sm text-fg-3 mt-1">
-                    O lote foi enfileirado e será processado em breve. Acompanhe o status na listagem.
-                  </p>
-                </div>
-                <Button onClick={handleCloseWizard}>Concluir</Button>
+            <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 px-6 pb-6">
+              <div className="w-16 h-16 rounded-full bg-srm-success-50 border border-srm-success-100 flex items-center justify-center">
+                <Icon name="checkCircle" size={32} className="text-srm-success-500" />
               </div>
-            </>
+              <div>
+                <p className="text-lg font-semibold text-fg-1">Solicitação Enviada</p>
+                <p className="text-sm text-fg-3 mt-1">
+                  O lote foi enfileirado e será processado em breve. Acompanhe o status na listagem.
+                </p>
+              </div>
+              <Button onClick={handleCloseWizard}>Concluir</Button>
+            </div>
           )}
 
         </ModalContent>
