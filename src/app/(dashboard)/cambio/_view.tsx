@@ -10,12 +10,13 @@ import type { ExchangeRate } from "@/types";
 import { toast } from "sonner";
 
 const columns = [
-  { 
-    id: "pair", 
-    header: "Par de Moedas", 
+  {
+    id: "pair",
+    header: "Par de Moedas",
+    enableColumnFilter: true,
     cell: ({ row }: { row: ExchangeRate }) => (
       <span className="font-bold">{row.from_currency}/{row.to_currency}</span>
-    ) 
+    )
   },
   { 
     id: "rate", 
@@ -56,8 +57,13 @@ interface Props {
 
 export function CambioView({ initialData, fetchRates, triggerCollect }: Props) {
   const [data, setData] = useState(initialData);
+  const [pairFilter, setPairFilter] = useState("");
   const [isPending, startTransition] = useTransition();
   const [isCollecting, setIsCollecting] = useState(false);
+
+  const displayData = pairFilter
+    ? data.filter((r) => `${r.from_currency}/${r.to_currency}`.toLowerCase().includes(pairFilter.toLowerCase()))
+    : data;
 
   const handleRefresh = () => {
     startTransition(async () => {
@@ -111,15 +117,15 @@ export function CambioView({ initialData, fetchRates, triggerCollect }: Props) {
           </Button>
         </div>
       </div>
-      <DataTable 
-        columns={columns} 
-        data={data} 
-        totalItems={data.length} 
-        pageSize={50} 
-        pageIndex={0} 
-        onPageChange={() => {}} 
-        onPageSizeChange={() => {}} 
-        onFilterChange={() => {}} 
+      <DataTable
+        columns={columns}
+        data={displayData}
+        totalItems={displayData.length}
+        pageSize={50}
+        pageIndex={0}
+        onPageChange={() => {}}
+        onPageSizeChange={() => {}}
+        onFilterChange={(_, value) => setPairFilter(value)}
       />
     </div>
   );

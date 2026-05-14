@@ -47,7 +47,7 @@ const columns = [
     cell: () => (
       <div className="flex items-center gap-1">
         <button
-          className="p-2 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer"
+          className="p-1 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer"
           title="Editar"
         >
           <Icon name="edit" size={16} />

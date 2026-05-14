@@ -17,8 +17,8 @@ const columns = [
     cell: ({ row }: { row: SettlementReportItem }) => 
       new Date(row.settled_at).toLocaleDateString("pt-BR")
   },
-  { id: "assignor_name", header: "Cedente", cell: ({ row }: { row: SettlementReportItem }) => <span className="font-bold">{row.assignor_name}</span> },
-  { id: "invoice_key", header: "Chave NF-e", cell: ({ row }: { row: SettlementReportItem }) => <span className="font-mono text-xs">{row.invoice_key.slice(0, 20)}...</span> },
+  { id: "assignor_name", header: "Cedente", enableColumnFilter: true, cell: ({ row }: { row: SettlementReportItem }) => <span className="font-bold">{row.assignor_name}</span> },
+  { id: "invoice_key", header: "Chave NF-e", enableColumnFilter: true, cell: ({ row }: { row: SettlementReportItem }) => <span className="font-mono text-xs">{row.invoice_key.slice(0, 20)}...</span> },
   { 
     id: "face_value_brl", 
     header: "Valor Face (BRL)", 
@@ -46,7 +46,14 @@ interface Props {
 
 export function RelatoriosView({ initialData, fetchReport }: Props) {
   const [data, setData] = useState(initialData);
+  const [localFilters, setLocalFilters] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
+
+  const displayItems = data.items.filter((row) => {
+    if (localFilters.assignor_name && !row.assignor_name.toLowerCase().includes(localFilters.assignor_name.toLowerCase())) return false;
+    if (localFilters.invoice_key && !row.invoice_key.toLowerCase().includes(localFilters.invoice_key.toLowerCase())) return false;
+    return true;
+  });
 
   const handleRefresh = (params?: any) => {
     startTransition(async () => {
@@ -91,15 +98,21 @@ export function RelatoriosView({ initialData, fetchReport }: Props) {
         <Kpi label="Spread Médio" value={`${(Number(data.summary.average_spread) * 100).toFixed(4)}%`} />
       </div>
 
-      <DataTable 
-        columns={columns} 
-        data={data.items} 
-        totalItems={data.summary.total_count} 
-        pageSize={data.page_size} 
-        pageIndex={data.page - 1} 
-        onPageChange={(page) => handleRefresh({ page: page + 1 })} 
-        onPageSizeChange={(size) => handleRefresh({ page_size: size })} 
-        onFilterChange={() => {}} 
+      <DataTable
+        columns={columns}
+        data={displayItems}
+        totalItems={displayItems.length}
+        pageSize={data.page_size}
+        pageIndex={data.page - 1}
+        onPageChange={(page) => handleRefresh({ page: page + 1 })}
+        onPageSizeChange={(size) => handleRefresh({ page_size: size })}
+        onFilterChange={(columnId, value) => {
+          setLocalFilters((prev) => {
+            const next = { ...prev, [columnId]: value };
+            if (!value) delete next[columnId];
+            return next;
+          });
+        }}
       />
     </div>
   );

@@ -223,7 +223,7 @@ const BATCH_STATUS_LABEL: Record<string, string> = {
 
 const batchColumns = [
   { id: "id", header: "ID", cell: ({ row }: { row: Batch }) => row.id },
-  { id: "assignor", header: "Cedente", cell: ({ row }: { row: Batch }) => row.assignor.social_reason },
+  { id: "assignor", header: "Cedente", enableColumnFilter: true, cell: ({ row }: { row: Batch }) => row.assignor.social_reason },
   { id: "total_receivables", header: "Títulos", cell: ({ row }: { row: Batch }) => row.total_receivables },
   {
     id: "total_face_value_brl",
@@ -267,6 +267,7 @@ const batchColumns = [
   {
     id: "status",
     header: "Status",
+    enableColumnFilter: true,
     cell: ({ row }: { row: Batch }) => (
       <Badge color={BATCH_STATUS_COLOR[row.status] ?? "neutral"} size="sm">
         {BATCH_STATUS_LABEL[row.status] ?? row.status}
@@ -319,6 +320,7 @@ export function LotesView({
   const [data, setData] = useState(initialData);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+  const [tableFilters, setTableFilters] = useState<Record<string, string>>({});
   const [, startTransition] = useTransition();
 
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
@@ -386,23 +388,39 @@ export function LotesView({
 
   // ── Page / table logic ──────────────────────────────────────────────────────
 
+  const displayData = tableFilters.assignor
+    ? data.filter((b) => b.assignor.social_reason.toLowerCase().includes(tableFilters.assignor.toLowerCase()))
+    : data;
+
   const totalItems =
-    data.length === pageSize
+    displayData.length === pageSize
       ? (pageIndex + 1) * pageSize + 1
-      : pageIndex * pageSize + data.length;
+      : pageIndex * pageSize + displayData.length;
 
   const loadPage = useCallback(
-    (nextPage: number, nextSize: number) => {
+    (nextPage: number, nextSize: number, nextFilters: Record<string, string> = tableFilters) => {
       startTransition(async () => {
-        const result = await fetchBatches({ page: nextPage + 1, pageSize: nextSize });
+        const result = await fetchBatches({
+          page: nextPage + 1,
+          pageSize: nextSize,
+          status: nextFilters.status || undefined,
+        });
         setData(result);
       });
     },
-    [fetchBatches],
+    [fetchBatches, tableFilters],
   );
 
   const handlePageChange = (page: number) => { setPageIndex(page); loadPage(page, pageSize); };
   const handlePageSizeChange = (size: number) => { setPageSize(size); setPageIndex(0); loadPage(0, size); };
+
+  const handleFilterChange = useCallback((columnId: string, value: string) => {
+    const nextFilters = { ...tableFilters, [columnId]: value };
+    if (!value) delete nextFilters[columnId];
+    setTableFilters(nextFilters);
+    setPageIndex(0);
+    loadPage(0, pageSize, nextFilters);
+  }, [tableFilters, pageSize, loadPage]);
 
   // ── Detail modal ────────────────────────────────────────────────────────────
 
@@ -634,13 +652,13 @@ export function LotesView({
 
       <DataTable
         columns={batchColumns}
-        data={data}
+        data={displayData}
         totalItems={totalItems}
         pageSize={pageSize}
         pageIndex={pageIndex}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        onFilterChange={() => {}}
+        onFilterChange={handleFilterChange}
         onRowClick={handleRowClick}
       />
 

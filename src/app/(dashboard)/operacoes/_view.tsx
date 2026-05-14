@@ -65,6 +65,7 @@ const columns = [
   {
     id: "status",
     header: "Status",
+    enableColumnFilter: true,
     cell: ({ row }: { row: Receivable }) => (
       <Badge color={STATUS_COLOR[row.status] ?? "neutral"} size="sm">
         {STATUS_LABEL[row.status] ?? row.status}
