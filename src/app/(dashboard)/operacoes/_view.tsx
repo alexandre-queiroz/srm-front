@@ -9,18 +9,18 @@ import { DataTable } from "@/components/ui/data-table";
 import Icon from "@/components/ui/icon";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from "@/components/ui/modal";
 import Select from "@/components/ui/select";
-import type { Receivable, ProductType, ReceivableUploadResult } from "@/types";
+import type { Receivable, ProductType, ReceivableUploadResult, Currency, Page } from "@/types";
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "danger" | "neutral"> = {
   available: "success",
-  batched: "warning",
-  settled: "neutral",
+  anticipated: "neutral",
+  invalid: "danger",
 };
 
 const STATUS_LABEL: Record<string, string> = {
   available: "Disponível",
-  batched: "Em Lote",
-  settled: "Liquidado",
+  anticipated: "Antecipado",
+  invalid: "Inválido",
 };
 
 const columns = [
@@ -29,20 +29,18 @@ const columns = [
     header: "Chave NF-e",
     enableColumnFilter: true,
     cell: ({ row }: { row: Receivable }) => (
-      <span className="font-mono text-xs text-fg-2 truncate max-w-[260px] block">{row.invoice_key}</span>
+      <span className="truncate max-w-[260px] block">{row.invoice_key}</span>
     ),
   },
   {
     id: "assignor",
     header: "Cedente",
-    enableColumnFilter: true,
-    cell: ({ row }: { row: Receivable }) => <span className="font-medium">{row.assignor.name}</span>,
+    cell: ({ row }: { row: Receivable }) => row.assignor.social_reason,
   },
   {
     id: "drawee",
     header: "Sacado",
-    enableColumnFilter: true,
-    cell: ({ row }: { row: Receivable }) => <span>{row.drawee.name}</span>,
+    cell: ({ row }: { row: Receivable }) => row.drawee.social_reason,
   },
   {
     id: "due_date",
@@ -53,8 +51,16 @@ const columns = [
   {
     id: "face_value",
     header: "Valor de Face",
-    cell: ({ row }: { row: Receivable }) =>
-      `${row.currency_code} ${Number(row.face_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+    cell: ({ row }: { row: Receivable }) => {
+      const symbols: Record<string, string> = {
+        BRL: "R$",
+        USD: "US$",
+        EUR: "€",
+        GBP: "£",
+      };
+      const symbol = symbols[row.currency_code] || row.currency_code;
+      return `${symbol} ${Number(row.face_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    },
   },
   {
     id: "status",
@@ -69,15 +75,19 @@ const columns = [
 
 interface Props {
   initialData: Receivable[];
+  initialTotal: number;
   productTypes: ProductType[];
-  fetchReceivables: (page: number, pageSize: number) => Promise<Receivable[]>;
+  currencies: Currency[];
+  fetchReceivables: (params: { page: number; pageSize: number; status?: string; invoice_key?: string; invoice_key_op?: string; assignor_id?: string }) => Promise<Page<Receivable>>;
   uploadXml: (formData: FormData) => Promise<ReceivableUploadResult>;
 }
 
-export function OperacoesView({ initialData, productTypes, fetchReceivables, uploadXml }: Props) {
+export function OperacoesView({ initialData, initialTotal, productTypes, currencies, fetchReceivables, uploadXml }: Props) {
   const [data, setData] = useState(initialData);
+  const [total, setTotal] = useState(initialTotal);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const [isPending, startTransition] = useTransition();
 
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -88,19 +98,20 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const totalItems =
-    data.length === pageSize
-      ? (pageIndex + 1) * pageSize + 1
-      : pageIndex * pageSize + data.length;
-
   const loadPage = useCallback(
-    (nextPage: number, nextSize: number) => {
+    (nextPage: number, nextSize: number, nextFilters: any = filters) => {
       startTransition(async () => {
-        const result = await fetchReceivables(nextPage + 1, nextSize);
-        setData(result);
+        const raw = await fetchReceivables({
+          page: nextPage + 1,
+          pageSize: nextSize,
+          ...nextFilters,
+        });
+        const result = Array.isArray(raw) ? { items: raw, total: (raw as any).length } : raw;
+        setData(result.items);
+        setTotal(result.total);
       });
     },
-    [fetchReceivables],
+    [fetchReceivables, filters],
   );
 
   const handlePageChange = (page: number) => {
@@ -112,6 +123,19 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
     setPageSize(size);
     setPageIndex(0);
     loadPage(0, size);
+  };
+
+  const handleFilterChange = (columnId: string, value: string, operator?: string) => {
+    const nextFilters = { ...filters, [columnId]: value };
+    if (!value) {
+      delete nextFilters[columnId];
+      delete nextFilters[`${columnId}_op`];
+    } else if (operator) {
+      nextFilters[`${columnId}_op`] = operator;
+    }
+    setFilters(nextFilters);
+    setPageIndex(0);
+    loadPage(0, pageSize, nextFilters);
   };
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -148,12 +172,10 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
 
   const productTypeOptions = productTypes.map((p) => ({ value: p.id, label: p.name }));
 
-  const currencyOptions = Array.from(
-    new Set(["BRL", ...initialData.map((r) => r.currency_code)]),
-  ).map((code) => ({ value: code, label: code }));
+  const currencyOptions = currencies.map((c) => ({ value: c.code, label: `${c.code} — ${c.name}` }));
 
   return (
-    <div className="h-full flex flex-col space-y-6">
+    <div className="h-full flex flex-col gap-6">
       <div className="flex items-end justify-between shrink-0">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Recebíveis</h1>
@@ -171,12 +193,12 @@ export function OperacoesView({ initialData, productTypes, fetchReceivables, upl
       <DataTable
         columns={columns}
         data={data}
-        totalItems={totalItems}
+        totalItems={total}
         pageSize={pageSize}
         pageIndex={pageIndex}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        onFilterChange={() => {}}
+        onFilterChange={handleFilterChange}
       />
 
       <Modal open={uploadOpen} onOpenChange={handleCloseUpload}>

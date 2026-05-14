@@ -108,7 +108,7 @@ export default function DashboardPage() {
   const discount = totalValue * 0.025; // 2.5% fixed for simulation
   const netValue = totalValue - discount;
   return (
-    <div className="max-w-[1600px] mx-auto space-y-4 pb-12">
+    <div className="h-full overflow-y-auto"><div className="max-w-[1600px] mx-auto space-y-4 pb-12">
       {/* Welcome Header */}
       <div className="flex items-end justify-between">
         <motion.div
@@ -304,7 +304,7 @@ export default function DashboardPage() {
                 <Select 
                   label="Cedente" 
                   value={selectedCedente} 
-                  onChange={(e) => setSelectedCedente(e.target.value)}
+                  onChange={(val) => setSelectedCedente(val)}
                   options={[
                     { label: "Selecione um cedente", value: "" },
                     { label: "Logística Alpha S.A.", value: "alpha" },
@@ -336,7 +336,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3">
                           <Checkbox 
                             checked={selectedTitles.includes(t.id)} 
-                            onCheckedChange={() => toggleTitle(t.id)} 
+                            onChange={() => toggleTitle(t.id)} 
                           />
                           <div>
                             <p className="text-sm font-bold text-fg-1">{t.id}</p>
@@ -430,6 +430,6 @@ export default function DashboardPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </div></div>
   );
 }

@@ -162,13 +162,13 @@ export function DataTable<TData>({
   const filterableColumns = columns.filter((c) => c.enableColumnFilter);
 
   return (
-    <div className="flex flex-col flex-1 w-full h-full">
+    <div className="flex flex-col flex-1 w-full min-h-0">
       <div className="rounded-2xl border-[0.5px] border-border-default shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)] bg-white overflow-hidden flex flex-col flex-1 min-h-0">
         
         <div className="flex-1 overflow-auto">
           <Table className={minWidth}>
-            <TableHeader>
-              <TableRow className="bg-surface-alt/30 hover:bg-surface-alt/30 border-b-border-subtle">
+            <TableHeader className="sticky top-0 z-10 bg-white">
+              <TableRow className="bg-surface-alt hover:bg-surface-alt border-b-border-subtle">
                 {columns.map((col) => (
                   <TableHead key={col.id} className="align-middle py-3 px-5">
                     <span className="text-[11.5px] uppercase tracking-wider text-fg-2 font-medium whitespace-nowrap">{col.header}</span>

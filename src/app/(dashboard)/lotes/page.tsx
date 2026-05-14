@@ -1,37 +1,65 @@
 import { getAuthToken } from "@/lib/server-auth";
-import { listBatches, getBatch, createBatch, previewBatch, queueBatch } from "@/repositories/batch-repository";
+import { safeCall } from "@/lib/safe-call";
+import { listBatches, getBatch, createBatch, queueBatch, simulateBatch } from "@/repositories/batch-repository";
 import { listReceivables } from "@/repositories/receivable-repository";
 import { listCompanies } from "@/repositories/company-repository";
-import type { Batch, BatchDetail, Receivable, Company, BatchPreview } from "@/types";
+import { getCurrentRate } from "@/repositories/exchange-rate-repository";
+import type { Batch, BatchDetail, Receivable, Company, BatchPreview, ExchangeRate } from "@/types";
 import { LotesView } from "./_view";
 
-async function fetchBatches(page: number, pageSize: number): Promise<Batch[]> {
+async function fetchCurrentRate(): Promise<ExchangeRate> {
   "use server";
   const token = await getAuthToken();
-  return listBatches(token, { page, page_size: pageSize });
+  return getCurrentRate(token);
 }
 
-async function fetchCompanies(query?: string): Promise<Company[]> {
+async function fetchBatches(params: { 
+  page: number; 
+  pageSize: number; 
+  status?: string; 
+  assignor_id?: string;
+}): Promise<Batch[]> {
   "use server";
   const token = await getAuthToken();
-  return listCompanies(token, { query, limit: 50 });
+  return listBatches(token, { 
+    page: params.page, 
+    page_size: params.pageSize,
+    status: params.status,
+    assignor_id: params.assignor_id
+  });
 }
+
+async function fetchCompanies(social_reason?: string): Promise<Company[]> {
+  "use server";
+  const token = await getAuthToken();
+  return listCompanies(token, { social_reason, limit: 50 });
+}
+
 
 async function fetchReceivablesByAssignor(assignorId: string, page: number, pageSize: number): Promise<Receivable[]> {
   "use server";
   const token = await getAuthToken();
-  return listReceivables(token, { assignor_id: assignorId, page, page_size: pageSize });
+  const result = await listReceivables(token, { assignor_id: assignorId, page, page_size: pageSize });
+  return result.items;
 }
 
-async function createBatchAndPreview(
+async function simulateBatchAction(
   assignorId: string,
   receivableIds: string[],
-): Promise<{ batch: Batch; preview: BatchPreview }> {
+): Promise<BatchPreview> {
+  "use server";
+  const token = await getAuthToken();
+  return simulateBatch(token, { assignor_id: assignorId, receivable_ids: receivableIds });
+}
+
+async function createAndQueueBatchAction(
+  assignorId: string,
+  receivableIds: string[],
+): Promise<Batch> {
   "use server";
   const token = await getAuthToken();
   const batch = await createBatch(token, { assignor_id: assignorId, receivable_ids: receivableIds });
-  const preview = await previewBatch(token, batch.id);
-  return { batch, preview };
+  return queueBatch(token, batch.id, batch.version);
 }
 
 async function fetchBatchDetail(batchId: string): Promise<BatchDetail> {
@@ -47,21 +75,20 @@ async function queueBatchAction(batchId: string, expectedVersion: number): Promi
 }
 
 export default async function LotesPage() {
-  const [initialData, companies] = await Promise.all([
-    fetchBatches(1, 20),
-    fetchCompanies(),
-  ]);
+  const initialData = await safeCall(() => fetchBatches({ page: 1, pageSize: 20 }), [] as Batch[]);
 
   return (
     <LotesView
       initialData={initialData}
-      companies={companies}
       fetchBatches={fetchBatches}
       fetchBatchDetail={fetchBatchDetail}
       fetchCompanies={fetchCompanies}
       fetchReceivablesByAssignor={fetchReceivablesByAssignor}
-      createBatchAndPreview={createBatchAndPreview}
+      simulateBatch={simulateBatchAction}
+      createAndQueueBatch={createAndQueueBatchAction}
       queueBatchAction={queueBatchAction}
+      fetchCurrentRate={fetchCurrentRate}
     />
   );
 }
+

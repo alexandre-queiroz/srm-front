@@ -28,6 +28,7 @@ const menuGroups = [
     title: "Configurações",
     items: [
       { icon: "dollar-sign", label: "Câmbio", href: "/cambio" },
+      { icon: "coins", label: "Moedas", href: "/moedas" },
       { icon: "package", label: "Produtos", href: "/produtos" },
       { icon: "settings", label: "Parâmetros", href: "/parametros" },
     ]
@@ -88,7 +89,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center h-10 px-3 rounded-xl transition-all duration-200 group",
+                        "flex items-center h-10 rounded-xl transition-all duration-200 group",
+                        isCollapsed ? "justify-center px-0" : "px-3",
                         isActive 
                           ? "bg-brand-blue-500 text-white shadow-lg shadow-brand-blue-500/20" 
                           : "text-brand-blue-100/60 hover:bg-white/5 hover:text-white"
@@ -181,7 +183,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+        <main className="flex-1 overflow-hidden p-8">
           {children}
         </main>
       </div>

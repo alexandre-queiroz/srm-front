@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../colors_and_type.css" />
+    <link rel="stylesheet" href="_card.css" />
+    <style>
+      .swatch-row {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 4px;
+      }
+      .sw {
+        aspect-ratio: 1 / 1.1;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 6px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        color: white;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+      }
+      .sw.light {
+        color: var(--srm-neutral-900);
+      }
+      .sw .v {
+        opacity: 0.85;
+      }
+      .label {
+        font-size: 12px;
+        color: var(--fg-2);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-weight: 500;
+      }
+      .label small {
+        color: var(--fg-3);
+        font-family: var(--font-mono);
+        font-weight: 400;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div>
+        <div class="label">Laranja SRM <small>--srm-orange-*</small></div>
+        <div class="swatch-row" style="margin-top: 8px">
+          <div class="sw light" style="background: #fdf1e8">
+            50
+            <div class="v">#FDF1E8</div>
+          </div>
+          <div class="sw light" style="background: #faddc4">
+            100
+            <div class="v">#FADDC4</div>
+          </div>
+          <div class="sw light" style="background: #f5b987">
+            200
+            <div class="v">#F5B987</div>
+          </div>
+          <div class="sw light" style="background: #ee8f45">
+            300
+            <div class="v">#EE8F45</div>
+          </div>
+          <div class="sw" style="background: #e36f1f">
+            400
+            <div class="v">#E36F1F</div>
+          </div>
+          <div class="sw" style="background: #d45200; outline: 2px solid var(--srm-blue-500); outline-offset: 2px">
+            500
+            <div class="v">#D45200</div>
+          </div>
+          <div class="sw" style="background: #b04200">
+            600
+            <div class="v">#B04200</div>
+          </div>
+          <div class="sw" style="background: #8a3300">
+            700
+            <div class="v">#8A3300</div>
+          </div>
+          <div class="sw" style="background: #642500">
+            800
+            <div class="v">#642500</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta" style="margin-top: 4px">
+        Acento. Use em destaques pontuais (KPI de movimento, &quot;novo&quot;, segundary CTA). Nunca como fundo dominante.
+      </div>
+    </div>
+  </body>
+</html>

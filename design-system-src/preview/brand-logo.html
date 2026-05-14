@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../colors_and_type.css" />
+    <link rel="stylesheet" href="_card.css" />
+    <style>
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .frame {
+        padding: 24px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-subtle);
+        min-height: 130px;
+      }
+      .frame.dark {
+        background: var(--srm-blue-900);
+        border-color: var(--srm-blue-900);
+      }
+      .frame.canvas {
+        background: var(--bg-canvas);
+      }
+      .frame img {
+        max-width: 100%;
+        max-height: 80px;
+      }
+      .caption {
+        font-size: 11px;
+        color: var(--fg-3);
+        font-family: var(--font-mono);
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="grid">
+        <div>
+          <div class="frame canvas">
+            <img src="../assets/logo-full.png" alt="SRM Capital em movimento — logo completo" />
+          </div>
+          <div class="caption">logo-full.png · lockup horizontal · uso padrão</div>
+        </div>
+
+        <div>
+          <div class="frame canvas">
+            <img src="../assets/logo-icon.png" alt="SRM hexágono — ícone" style="max-height: 72px; border-radius: 8px" />
+          </div>
+          <div class="caption">logo-icon.png · hexágono · favicon · sidebar colapsada</div>
+        </div>
+
+        <div>
+          <div class="frame dark">
+            <img src="../assets/logo-icon.png" alt="SRM em fundo escuro" style="max-height: 64px; border-radius: 8px" />
+          </div>
+          <div class="caption">Aplicado sobre azul-900 · hero · footer</div>
+        </div>
+
+        <div>
+          <div class="frame canvas" style="position: relative; overflow: hidden">
+            <img src="../assets/logo-icon.png" style="position: absolute; right: -30px; bottom: -30px; max-height: 160px; opacity: 0.12" />
+            <div style="font-size: 13px; color: var(--fg-2); text-align: center; max-width: 200px">
+              Marca decorativa em empty states — opacidade 10-15%
+            </div>
+          </div>
+          <div class="caption">Uso decorativo · empty states · nunca sobre texto</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

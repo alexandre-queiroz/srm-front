@@ -1,10 +1,10 @@
 import * as receivableRepo from "@/repositories/receivable-repository";
-import type { CursorPage, Receivable, ReceivableUploadResult } from "@/types";
+import type { CursorPage, Page, Receivable, ReceivableUploadResult } from "@/types";
 
 export async function getReceivables(
   token: string,
   params?: { assignor_id?: string; page?: number; page_size?: number },
-): Promise<Receivable[]> {
+): Promise<Page<Receivable>> {
   return receivableRepo.listReceivables(token, params);
 }
 

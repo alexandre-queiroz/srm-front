@@ -25,7 +25,7 @@ export default function LoginPage() {
     try {
       const result = await loginAction({ email, password });
 
-      if (result?.error) {
+      if (result && "error" in result) {
         throw new Error(result.error);
       }
 

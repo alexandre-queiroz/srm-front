@@ -1,7 +1,19 @@
 export interface Company {
   id: string;
   cnpj: string;
+  social_reason: string;
+  fantasy_name: string | null;
+  created_at: string;
+  available_receivables_count: number;
+}
+
+export interface Currency {
+  id: string;
+  code: string;
   name: string;
+  symbol: string;
+  is_base: boolean;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -43,6 +55,8 @@ export interface Batch {
   version: number;
   rejection_reasons: Record<string, unknown> | null;
   total_receivables: number;
+  total_face_value_brl: string;
+  total_present_value_brl: string;
   created_at: string;
   updated_at: string;
 }
@@ -106,6 +120,14 @@ export interface SystemParam {
 export interface CursorPage<T> {
   items: T[];
   next_cursor: string | null;
+}
+
+export interface Page<T> {
+  items: T[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
 }
 
 export interface ApiError {
