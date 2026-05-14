@@ -63,6 +63,12 @@
   --srm-danger-600: #a41b20;
   --srm-danger-700: #7c1518;
 
+  --srm-info-50: #e8f0fb;
+  --srm-info-100: #c5d8f6;
+  --srm-info-500: #2461af;
+  --srm-info-600: #1d4f8f;
+  --srm-info-700: #173e72;
+
   /* --- Spacing --- */
   --space-1: 4px;
   --space-2: 8px;
@@ -185,6 +191,12 @@
   --color-srm-danger-500: var(--srm-danger-500);
   --color-srm-danger-600: var(--srm-danger-600);
   --color-srm-danger-700: var(--srm-danger-700);
+
+  --color-srm-info-50: var(--srm-info-50);
+  --color-srm-info-100: var(--srm-info-100);
+  --color-srm-info-500: var(--srm-info-500);
+  --color-srm-info-600: var(--srm-info-600);
+  --color-srm-info-700: var(--srm-info-700);
 
   /* Shadows */
   --shadow-xs: var(--shadow-xs);
