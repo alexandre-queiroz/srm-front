@@ -133,3 +133,37 @@ export interface Page<T> {
 export interface ApiError {
   detail: string;
 }
+
+export interface DashboardKpis {
+  total_anticipated_brl: string;
+  total_available_receivables: number;
+  average_rate_pct: string;
+  total_approved_batches: number;
+}
+
+export interface DailyVolume {
+  date: string;
+  volume_brl: string;
+}
+
+export interface TopAssignor {
+  assignor_name: string;
+  total_anticipated_brl: string;
+  total_batches: number;
+}
+
+export interface RecentBatch {
+  id: string;
+  assignor_name: string;
+  status: string;
+  total_face_value_brl: string;
+  total_present_value_brl: string;
+  created_at: string;
+}
+
+export interface DashboardData {
+  kpis: DashboardKpis;
+  daily_volume: DailyVolume[];
+  top_assignors: TopAssignor[];
+  recent_batches: RecentBatch[];
+}
