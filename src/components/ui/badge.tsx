@@ -3,7 +3,7 @@ import React from "react";
 import Icon from "./icon";
 
 interface BadgeProps {
-  color?: "brand" | "accent" | "neutral" | "danger" | "success" | "warning";
+  color?: "brand" | "accent" | "neutral" | "danger" | "success" | "warning" | "info";
   variant?: "solid" | "soft" | "outline";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
@@ -29,6 +29,7 @@ export default function Badge({
       danger: "bg-srm-danger-500 text-white border-transparent",
       success: "bg-srm-success-500 text-white border-transparent",
       warning: "bg-srm-warning-500 text-white border-transparent",
+      info: "bg-srm-info-500 text-white border-transparent",
     },
     soft: {
       brand: "bg-brand-blue-50 border-brand-blue-200/60 text-brand-blue-700",
@@ -37,6 +38,7 @@ export default function Badge({
       danger: "bg-srm-danger-50 border-srm-danger-100 text-srm-danger-700",
       success: "bg-srm-success-50 border-srm-success-100 text-srm-success-700",
       warning: "bg-srm-warning-50 border-srm-warning-100 text-srm-warning-700",
+      info: "bg-srm-info-50 border-srm-info-100 text-srm-info-700",
     },
     outline: {
       brand: "bg-transparent border-[0.5px] border-brand-blue-500 text-brand-blue-600",
@@ -45,6 +47,7 @@ export default function Badge({
       danger: "bg-transparent border-[0.5px] border-srm-danger-500 text-srm-danger-600",
       success: "bg-transparent border-[0.5px] border-srm-success-500 text-srm-success-600",
       warning: "bg-transparent border-[0.5px] border-srm-warning-500 text-srm-warning-600",
+      info: "bg-transparent border-[0.5px] border-srm-info-500 text-srm-info-600",
     },
   };
 
@@ -57,6 +60,7 @@ export default function Badge({
       danger: "bg-srm-danger-500",
       success: "bg-srm-success-500",
       warning: "bg-srm-warning-500",
+      info: "bg-srm-info-500",
     },
     outline: {
       brand: "bg-brand-blue-500",
@@ -65,6 +69,7 @@ export default function Badge({
       danger: "bg-srm-danger-500",
       success: "bg-srm-success-500",
       warning: "bg-srm-warning-500",
+      info: "bg-srm-info-500",
     },
   };
 

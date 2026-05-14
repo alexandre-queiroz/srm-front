@@ -77,6 +77,13 @@ export default function DesignTokensPage() {
         var: `--srm-danger-${s}`,
       })),
     },
+    {
+      name: "Semantic: Info",
+      tokens: [50, 100, 500, 600, 700].map((s) => ({
+        name: `${s}`,
+        var: `--srm-info-${s}`,
+      })),
+    },
   ];
 
   const spacingTokens = [
