@@ -29,12 +29,12 @@ page.tsx  →  service  →  repository  →  apiFetchJson  →  API
 
 ## Trade-off
 
-| Critério | Repository direto / Service quando necessário | Service sempre obrigatório |
-|---|---|---|
-| Localização da lógica de API | Centralizada no repositório | Centralizada no service |
-| Overhead sem lógica de negócio | Nenhum — page → repo direto | Arquivo de service vazio |
-| Rastreabilidade | Repositório é ponto único por entidade | Dois arquivos para rastrear |
-| Escalabilidade para regras complexas | Introduz service quando surge a necessidade | Já existe o arquivo, fácil de adicionar |
+| Critério                             | Repository direto / Service quando necessário | Service sempre obrigatório              |
+| ------------------------------------ | --------------------------------------------- | --------------------------------------- |
+| Localização da lógica de API         | Centralizada no repositório                   | Centralizada no service                 |
+| Overhead sem lógica de negócio       | Nenhum — page → repo direto                   | Arquivo de service vazio                |
+| Rastreabilidade                      | Repositório é ponto único por entidade        | Dois arquivos para rastrear             |
+| Escalabilidade para regras complexas | Introduz service quando surge a necessidade   | Já existe o arquivo, fácil de adicionar |
 
 ## Justificativa
 

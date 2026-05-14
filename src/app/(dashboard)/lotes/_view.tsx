@@ -27,8 +27,19 @@ interface PreviewItemCardProps {
   exchangeRate?: number | null;
 }
 
-function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily, totalDaily, fmtPct, formatCurrency, exchangeRate }: PreviewItemCardProps) {
-  // 1. Normalize values. In approved batches, 'present' might already be in BRL 
+function PreviewItemCard({
+  item,
+  face,
+  present,
+  discount,
+  baseDaily,
+  spreadDaily,
+  totalDaily,
+  fmtPct,
+  formatCurrency,
+  exchangeRate,
+}: PreviewItemCardProps) {
+  // 1. Normalize values. In approved batches, 'present' might already be in BRL
   // while 'face' is in the original currency (e.g. USD).
   const nFace = Number(face);
   let nPresent = Number(present);
@@ -37,7 +48,7 @@ function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily
   // Heuristic: if present value is much larger than face value and we have an exchange rate,
   // it means 'present' is likely the BRL settlement value.
   const isPresentAlreadyBRL = item.currency_code !== "BRL" && nPresent > nFace * 1.5;
-  
+
   if (isPresentAlreadyBRL && nExchange > 0) {
     nPresent = nPresent / nExchange;
   }
@@ -45,10 +56,8 @@ function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily
   const nDiscount = nFace - nPresent;
 
   // 2. Calculate proportional discounts based on daily rates
-  const baseDiscount = totalDaily != null && totalDaily > 0 && baseDaily != null
-    ? nDiscount * (baseDaily / totalDaily) : 0;
-  const spreadDiscount = totalDaily != null && totalDaily > 0 && spreadDaily != null
-    ? nDiscount * (spreadDaily / totalDaily) : 0;
+  const baseDiscount = totalDaily != null && totalDaily > 0 && baseDaily != null ? nDiscount * (baseDaily / totalDaily) : 0;
+  const spreadDiscount = totalDaily != null && totalDaily > 0 && spreadDaily != null ? nDiscount * (spreadDaily / totalDaily) : 0;
 
   const rows: { label: string; sub?: string; value: string; muted?: boolean; danger?: boolean; bold?: boolean; highlight?: boolean }[] = [
     { label: "Valor Bruto", value: formatCurrency(nFace, item.currency_code), bold: true },
@@ -64,49 +73,53 @@ function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily
   }
 
   rows.push(
-    { 
-      label: "Taxa Base", 
-      sub: baseDaily != null ? `${fmtPct(baseDaily)}/d` : undefined, 
-      value: `- ${formatCurrency(Math.abs(baseDiscount), item.currency_code)}`, 
-      danger: true 
+    {
+      label: "Taxa Base",
+      sub: baseDaily != null ? `${fmtPct(baseDaily)}/d` : undefined,
+      value: `- ${formatCurrency(Math.abs(baseDiscount), item.currency_code)}`,
+      danger: true,
     },
-    { 
-      label: "Spread", 
-      sub: spreadDaily != null ? `${fmtPct(spreadDaily)}/d` : undefined, 
-      value: `- ${formatCurrency(Math.abs(spreadDiscount), item.currency_code)}`, 
-      danger: true 
+    {
+      label: "Spread",
+      sub: spreadDaily != null ? `${fmtPct(spreadDaily)}/d` : undefined,
+      value: `- ${formatCurrency(Math.abs(spreadDiscount), item.currency_code)}`,
+      danger: true,
     },
-    { 
-      label: "Desconto Total", 
-      sub: totalDaily != null ? `${fmtPct(totalDaily)}/d` : undefined, 
-      value: `- ${formatCurrency(Math.abs(nDiscount), item.currency_code)}`, 
-      danger: true, 
-      muted: true 
+    {
+      label: "Desconto Total",
+      sub: totalDaily != null ? `${fmtPct(totalDaily)}/d` : undefined,
+      value: `- ${formatCurrency(Math.abs(nDiscount), item.currency_code)}`,
+      danger: true,
+      muted: true,
     },
   );
 
   return (
-    <div className="border border-border-default rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-      <div className="px-4 py-3 border-b border-border-subtle bg-surface-alt/10 flex justify-between items-start">
+    <div className="border-border-default overflow-hidden rounded-xl border bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className="border-border-subtle bg-surface-alt/10 flex items-start justify-between border-b px-4 py-3">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-fg-1 truncate">{item.drawee.social_reason}</p>
-          <p className="text-[10px] text-fg-3 uppercase tracking-wider font-semibold">
+          <p className="text-fg-1 truncate text-sm font-bold">{item.drawee.social_reason}</p>
+          <p className="text-fg-3 text-[10px] font-semibold tracking-wider uppercase">
             Parcela {item.installment_number} · {item.term_days} dias
           </p>
         </div>
-        <Badge variant="outline" color="neutral" className="font-mono text-[9px] px-1.5">{item.invoice_key.slice(-8)}</Badge>
+        <Badge variant="outline" color="neutral" className="px-1.5 font-mono text-[9px]">
+          {item.invoice_key.slice(-8)}
+        </Badge>
       </div>
 
-      <div className="px-4 py-3 space-y-2">
+      <div className="space-y-2 px-4 py-3">
         <div className="grid grid-cols-2 gap-x-8 gap-y-2">
           {rows.map(({ label, sub, value, danger, muted, bold, highlight }) => (
             <React.Fragment key={label}>
               <div className="flex items-baseline gap-1.5">
-                <span className={`text-[11px] ${bold ? "font-bold text-fg-1" : "text-fg-3"}`}>{label}</span>
-                {sub && <span className="text-[9px] text-fg-4 font-mono">{sub}</span>}
+                <span className={`text-[11px] ${bold ? "text-fg-1 font-bold" : "text-fg-3"}`}>{label}</span>
+                {sub && <span className="text-fg-4 font-mono text-[9px]">{sub}</span>}
               </div>
               <div className="text-right">
-                <span className={`text-[11px] font-semibold tabular-nums ${danger ? "text-srm-danger-600" : highlight ? "text-brand-blue-600" : "text-fg-1"}`}>
+                <span
+                  className={`text-[11px] font-semibold tabular-nums ${danger ? "text-srm-danger-600" : highlight ? "text-brand-blue-600" : "text-fg-1"}`}
+                >
                   {value}
                 </span>
               </div>
@@ -114,16 +127,12 @@ function PreviewItemCard({ item, face, present, discount, baseDaily, spreadDaily
           ))}
         </div>
 
-        <div className="mt-2 pt-2 border-t border-border-subtle flex justify-between items-center">
-          <span className="text-xs font-bold text-fg-1">Líquido a Receber</span>
+        <div className="border-border-subtle mt-2 flex items-center justify-between border-t pt-2">
+          <span className="text-fg-1 text-xs font-bold">Líquido a Receber</span>
           <div className="text-right">
-            <p className="text-sm font-bold text-brand-blue-700 tabular-nums">
-              {formatCurrency(nPresent, item.currency_code)}
-            </p>
+            <p className="text-brand-blue-700 text-sm font-bold tabular-nums">{formatCurrency(nPresent, item.currency_code)}</p>
             {item.currency_code !== "BRL" && nExchange > 1 && (
-              <p className="text-[10px] font-bold text-brand-blue-500/80">
-                {formatCurrency(nPresent * nExchange, "BRL")}
-              </p>
+              <p className="text-brand-blue-500/80 text-[10px] font-bold">{formatCurrency(nPresent * nExchange, "BRL")}</p>
             )}
           </div>
         </div>
@@ -151,19 +160,20 @@ function WizardStepper({ step }: { step: WizardStep }) {
         const active = i === currentIndex;
         return (
           <React.Fragment key={s.id}>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex shrink-0 items-center gap-2">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors
-                  ${done ? "bg-brand-blue-500 text-white" : active ? "bg-brand-blue-50 text-brand-blue-600 ring-2 ring-brand-blue-200" : "bg-surface-alt text-fg-disabled"}`}
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${done ? "bg-brand-blue-500 text-white" : active ? "bg-brand-blue-50 text-brand-blue-600 ring-brand-blue-200 ring-2" : "bg-surface-alt text-fg-disabled"}`}
               >
                 {done ? <Icon name="check" size={12} stroke={2.5} /> : i + 1}
               </div>
-              <span className={`text-sm font-medium transition-colors ${active ? "text-fg-1" : done ? "text-brand-blue-500" : "text-fg-disabled"}`}>
+              <span
+                className={`text-sm font-medium transition-colors ${active ? "text-fg-1" : done ? "text-brand-blue-500" : "text-fg-disabled"}`}
+              >
                 {s.label}
               </span>
             </div>
             {i < WIZARD_STEPS.length - 1 && (
-              <div className={`flex-1 mx-3 h-px transition-colors ${i < currentIndex ? "bg-brand-blue-300" : "bg-border-default"}`} />
+              <div className={`mx-3 h-px flex-1 transition-colors ${i < currentIndex ? "bg-brand-blue-300" : "bg-border-default"}`} />
             )}
           </React.Fragment>
         );
@@ -182,19 +192,18 @@ function AssignorCard({ company, selected, onClick }: { company: Company; select
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left flex items-center justify-between px-4 py-3.5 rounded-xl border transition-all cursor-pointer
-        ${selected
-          ? "border-brand-blue-400 bg-brand-blue-50/60 ring-2 ring-brand-blue-200"
-          : "border-border-subtle hover:border-border-strong hover:bg-surface-alt/40"}`}
+      className={`flex w-full cursor-pointer items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all ${
+        selected
+          ? "border-brand-blue-400 bg-brand-blue-50/60 ring-brand-blue-200 ring-2"
+          : "border-border-subtle hover:border-border-strong hover:bg-surface-alt/40"
+      }`}
     >
       <div className="min-w-0">
-        <p className={`text-sm font-semibold truncate ${selected ? "text-brand-blue-700" : "text-fg-1"}`}>
+        <p className={`truncate text-sm font-semibold ${selected ? "text-brand-blue-700" : "text-fg-1"}`}>
           {company.fantasy_name ?? company.social_reason}
         </p>
-        {company.fantasy_name && (
-          <p className="text-xs text-fg-3 truncate">{company.social_reason}</p>
-        )}
-        <p className="text-xs text-fg-3 mt-0.5">{cnpj}</p>
+        {company.fantasy_name && <p className="text-fg-3 truncate text-xs">{company.social_reason}</p>}
+        <p className="text-fg-3 mt-0.5 text-xs">{cnpj}</p>
       </div>
       <div className="ml-4 shrink-0">
         <Badge color={count > 0 ? "brand" : "neutral"} size="sm">
@@ -238,9 +247,7 @@ const batchColumns = [
     header: "Vlr. Líquido (BRL)",
     cell: ({ row }: { row: Batch }) => {
       const val = Number(row.total_present_value_brl);
-      return val > 0 && !isNaN(val)
-        ? `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-        : "—";
+      return val > 0 && !isNaN(val) ? `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "—";
     },
   },
   {
@@ -278,14 +285,26 @@ const batchColumns = [
     id: "created_at",
     header: "Criado em",
     cell: ({ row }: { row: Batch }) =>
-      new Date(row.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+      new Date(row.created_at).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
   },
   {
     id: "processed_at",
     header: "Processado em",
     cell: ({ row }: { row: Batch }) =>
       row.status === "approved"
-        ? new Date(row.updated_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+        ? new Date(row.updated_at).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
         : "—",
   },
 ];
@@ -328,14 +347,16 @@ export function LotesView({
   useEffect(() => {
     let mounted = true;
     fetchCurrentRate()
-      .then(rate => {
+      .then((rate) => {
         if (mounted && rate?.rate) {
           console.log("Exchange rate loaded:", rate.rate);
           setExchangeRate(Number(rate.rate));
         }
       })
       .catch((err) => console.error("Failed to fetch exchange rate:", err));
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [fetchCurrentRate]);
 
   // Wizard state
@@ -362,17 +383,30 @@ export function LotesView({
   const debouncedSearch = useDebounce(assignorSearch, 350);
 
   useEffect(() => {
-    if (!debouncedSearch.trim()) {
-      setSearchResults([]);
-      return;
-    }
     let cancelled = false;
-    setIsSearching(true);
-    fetchCompanies(debouncedSearch)
-      .then((res) => { if (!cancelled) setSearchResults(res); })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setIsSearching(false); });
-    return () => { cancelled = true; };
+    if (!debouncedSearch.trim()) {
+      Promise.resolve().then(() => {
+        if (!cancelled) setSearchResults([]);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      setIsSearching(true);
+      fetchCompanies(debouncedSearch)
+        .then((res) => {
+          if (!cancelled) setSearchResults(res);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) setIsSearching(false);
+        });
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedSearch, fetchCompanies]);
 
   const formatCurrency = (v: string | number, currency: string) => {
@@ -392,10 +426,7 @@ export function LotesView({
     ? data.filter((b) => b.assignor.social_reason.toLowerCase().includes(tableFilters.assignor.toLowerCase()))
     : data;
 
-  const totalItems =
-    displayData.length === pageSize
-      ? (pageIndex + 1) * pageSize + 1
-      : pageIndex * pageSize + displayData.length;
+  const totalItems = displayData.length === pageSize ? (pageIndex + 1) * pageSize + 1 : pageIndex * pageSize + displayData.length;
 
   const loadPage = useCallback(
     (nextPage: number, nextSize: number, nextFilters: Record<string, string> = tableFilters) => {
@@ -411,16 +442,26 @@ export function LotesView({
     [fetchBatches, tableFilters],
   );
 
-  const handlePageChange = (page: number) => { setPageIndex(page); loadPage(page, pageSize); };
-  const handlePageSizeChange = (size: number) => { setPageSize(size); setPageIndex(0); loadPage(0, size); };
-
-  const handleFilterChange = useCallback((columnId: string, value: string) => {
-    const nextFilters = { ...tableFilters, [columnId]: value };
-    if (!value) delete nextFilters[columnId];
-    setTableFilters(nextFilters);
+  const handlePageChange = (page: number) => {
+    setPageIndex(page);
+    loadPage(page, pageSize);
+  };
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setPageIndex(0);
-    loadPage(0, pageSize, nextFilters);
-  }, [tableFilters, pageSize, loadPage]);
+    loadPage(0, size);
+  };
+
+  const handleFilterChange = useCallback(
+    (columnId: string, value: string) => {
+      const nextFilters = { ...tableFilters, [columnId]: value };
+      if (!value) delete nextFilters[columnId];
+      setTableFilters(nextFilters);
+      setPageIndex(0);
+      loadPage(0, pageSize, nextFilters);
+    },
+    [tableFilters, pageSize, loadPage],
+  );
 
   // ── Detail modal ────────────────────────────────────────────────────────────
 
@@ -430,8 +471,8 @@ export function LotesView({
     setIsLoadingDetail(true);
     try {
       setDetailBatch(await fetchBatchDetail(row.id));
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao carregar detalhe do lote.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao carregar detalhe do lote.");
       setDetailOpen(false);
     } finally {
       setIsLoadingDetail(false);
@@ -447,8 +488,8 @@ export function LotesView({
       loadPage(0, pageSize);
       setPageIndex(0);
       toast.success("Lote enviado para a fila.");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao solicitar antecipação.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao solicitar antecipação.");
     } finally {
       setIsQueuingDetail(false);
     }
@@ -466,7 +507,10 @@ export function LotesView({
     setPreview(null);
   };
 
-  const handleCloseWizard = () => { setWizardOpen(false); resetWizard(); };
+  const handleCloseWizard = () => {
+    setWizardOpen(false);
+    resetWizard();
+  };
 
   const handleAssignorNext = async () => {
     if (!selectedAssignorId) return;
@@ -475,8 +519,8 @@ export function LotesView({
       const receivables = await fetchReceivablesByAssignor(selectedAssignorId, 1, 100);
       setAvailableReceivables(receivables.filter((r) => r.status === "available"));
       setStep("receivables");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao carregar recebíveis.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao carregar recebíveis.");
     } finally {
       setIsLoadingReceivables(false);
     }
@@ -485,7 +529,8 @@ export function LotesView({
   const toggleReceivable = (id: string) => {
     setSelectedReceivableIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -504,8 +549,8 @@ export function LotesView({
     try {
       setPreview(await simulateBatch(selectedAssignorId, Array.from(selectedReceivableIds)));
       setStep("preview");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao simular lote.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao simular lote.");
     } finally {
       setIsCreating(false);
     }
@@ -519,8 +564,8 @@ export function LotesView({
       setStep("success");
       loadPage(0, pageSize);
       setPageIndex(0);
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao solicitar antecipação.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao solicitar antecipação.");
     } finally {
       setIsQueuing(false);
     }
@@ -553,8 +598,7 @@ export function LotesView({
     totalReceivables: number;
     exchangeRate: number | null;
   }) {
-    const { baseRateAnnual, spreadAnnual, baseRateDaily, spreadDaily, totalRateDaily, fmtPct, fmtPctAnnual } =
-      buildRatePanel(items);
+    const { baseRateAnnual, spreadAnnual, baseRateDaily, spreadDaily, totalRateDaily, fmtPct, fmtPctAnnual } = buildRatePanel(items);
 
     const nExchange = Number(exchangeRate || 1);
 
@@ -566,65 +610,67 @@ export function LotesView({
 
     const totalPresentBRL = items.reduce((sum, item) => {
       const face = Number(item.face_value);
-      let present = Number(item.present_value);
-      
+      const present = Number(item.present_value);
+
       // Normalization: if present is already in BRL (for approved batches), don't convert again
       const isAlreadyBRL = item.currency_code !== "BRL" && present > face * 1.5;
-      
-      const valueBRL = (isAlreadyBRL || item.currency_code === "BRL") 
-        ? present 
-        : present * nExchange;
-        
+
+      const valueBRL = isAlreadyBRL || item.currency_code === "BRL" ? present : present * nExchange;
+
       return sum + valueBRL;
     }, 0);
 
     const totalDiscountBRL = totalFaceBRL - totalPresentBRL;
 
     return (
-      <div className="rounded-2xl bg-brand-blue-950 text-white p-5 space-y-4 sticky top-0">
+      <div className="bg-brand-blue-950 sticky top-0 space-y-4 rounded-2xl p-5 text-white">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300 mb-3">Composição das Taxas</p>
+          <p className="text-brand-blue-300 mb-3 text-[10px] font-bold tracking-widest uppercase">Composição das Taxas</p>
           <div className="space-y-2.5">
             {[
               { label: "Taxa Base", daily: baseRateDaily, annual: baseRateAnnual },
               { label: "Spread", daily: spreadDaily, annual: spreadAnnual },
             ].map(({ label, daily, annual }) => (
               <div key={label} className="flex items-center justify-between">
-                <span className="text-xs text-brand-blue-300">{label}</span>
+                <span className="text-brand-blue-300 text-xs">{label}</span>
                 <div className="text-right">
-                  <span className="text-sm font-semibold">{fmtPct(daily)}<span className="text-brand-blue-400 font-normal text-xs"> /d</span></span>
-                  <p className="text-[10px] text-brand-blue-400">{fmtPctAnnual(annual)}</p>
+                  <span className="text-sm font-semibold">
+                    {fmtPct(daily)}
+                    <span className="text-brand-blue-400 text-xs font-normal"> /d</span>
+                  </span>
+                  <p className="text-brand-blue-400 text-[10px]">{fmtPctAnnual(annual)}</p>
                 </div>
               </div>
             ))}
-            <div className="border-t border-white/10 pt-2.5 flex items-center justify-between">
+            <div className="flex items-center justify-between border-t border-white/10 pt-2.5">
               <span className="text-xs font-bold text-white">Taxa Total</span>
               <div className="text-right">
-                <span className="text-sm font-bold text-brand-blue-200">{fmtPct(totalRateDaily)}<span className="text-brand-blue-400 font-normal text-xs"> /d</span></span>
-                <p className="text-[10px] text-brand-blue-400">{fmtPctAnnual(baseRateAnnual + spreadAnnual)}</p>
+                <span className="text-brand-blue-200 text-sm font-bold">
+                  {fmtPct(totalRateDaily)}
+                  <span className="text-brand-blue-400 text-xs font-normal"> /d</span>
+                </span>
+                <p className="text-brand-blue-400 text-[10px]">{fmtPctAnnual(baseRateAnnual + spreadAnnual)}</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="border-t border-white/10 pt-4 space-y-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300">Resumo (Total em BRL)</p>
+        <div className="space-y-3 border-t border-white/10 pt-4">
+          <p className="text-brand-blue-300 text-[10px] font-bold tracking-widest uppercase">Resumo (Total em BRL)</p>
           {[
             { label: "Títulos", value: String(totalReceivables) },
             { label: "Valor de Face", value: formatCurrency(totalFaceBRL, "BRL") },
             { label: "Desconto Total", value: `- ${formatCurrency(totalDiscountBRL, "BRL")}`, danger: true },
           ].map(({ label, value, danger }) => (
             <div key={label} className="flex items-center justify-between">
-              <span className="text-xs text-brand-blue-300">{label}</span>
+              <span className="text-brand-blue-300 text-xs">{label}</span>
               <span className={`text-sm font-semibold ${danger ? "text-srm-danger-400" : "text-white"}`}>{value}</span>
             </div>
           ))}
           <div className="border-t border-white/10 pt-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-blue-300 mb-1">Valor Líquido Total</p>
-            <p className="text-2xl font-bold text-brand-blue-200">{formatCurrency(totalPresentBRL, "BRL")}</p>
-            {items.some(i => i.currency_code !== "BRL") && (
-              <p className="text-[10px] text-brand-blue-400 mt-1 italic">
-                * Valores convertidos usando a taxa de câmbio atual.
-              </p>
+            <p className="text-brand-blue-300 mb-1 text-[10px] font-bold tracking-widest uppercase">Valor Líquido Total</p>
+            <p className="text-brand-blue-200 text-2xl font-bold">{formatCurrency(totalPresentBRL, "BRL")}</p>
+            {items.some((i) => i.currency_code !== "BRL") && (
+              <p className="text-brand-blue-400 mt-1 text-[10px] italic">* Valores convertidos usando a taxa de câmbio atual.</p>
             )}
           </div>
         </div>
@@ -635,17 +681,13 @@ export function LotesView({
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-end justify-between shrink-0">
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex shrink-0 items-end justify-between">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Lotes</h1>
+          <h1 className="t-h3 text-fg-1 !text-2xl tracking-tight">Lotes</h1>
           <p className="t-body !text-fg-3 mt-0.5">Agrupamentos de recebíveis para antecipação.</p>
         </motion.div>
-        <Button
-          className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10"
-          icon="plus"
-          onClick={() => setWizardOpen(true)}
-        >
+        <Button className="shadow-brand-blue-500/10 h-9 px-4 text-xs font-bold shadow-md" icon="plus" onClick={() => setWizardOpen(true)}>
           Novo Lote
         </Button>
       </div>
@@ -669,80 +711,83 @@ export function LotesView({
             <div className="flex items-center justify-center py-20">
               <Icon name="loader" size={28} className="text-brand-blue-400 animate-spin" />
             </div>
-          ) : (() => {
-            const totalFace = detailBatch.items.reduce((s, i) => s + Number(i.face_value), 0);
-            const totalPresent = detailBatch.items.reduce((s, i) => s + Number(i.present_value), 0);
-            const { fmtPct } = buildRatePanel(detailBatch.items);
-            return (
-              <>
-                <ModalHeader>
-                  <div className="flex items-center gap-3">
-                    <ModalTitle>Lote {detailBatch.id}</ModalTitle>
-                    <Badge color={BATCH_STATUS_COLOR[detailBatch.status] ?? "neutral"} size="sm">
-                      {BATCH_STATUS_LABEL[detailBatch.status] ?? detailBatch.status}
-                    </Badge>
-                  </div>
-                  <ModalDescription>
-                    {detailBatch.assignor.fantasy_name ?? detailBatch.assignor.social_reason} · {detailBatch.total_receivables} título(s)
-                  </ModalDescription>
-                </ModalHeader>
-                <div className="px-6 pb-2">
-                  <div className="flex gap-5 items-start">
-                    <div className="flex-[3] min-w-0 space-y-2 max-h-[480px] overflow-y-auto pr-1">
-                      {detailBatch.items.map((item) => {
-                        const face = Number(item.face_value);
-                        const present = Number(item.present_value);
-                        const iBase = item.base_rate_annual != null ? Number(item.base_rate_annual) : null;
-                        const iSpread = item.spread_annual != null ? Number(item.spread_annual) : null;
-                        const iBaseDaily = iBase != null && iBase > 0 ? Math.pow(1 + iBase, 1 / 365) - 1 : null;
-                        const iSpreadDaily = iSpread != null && iSpread > 0 ? Math.pow(1 + iSpread, 1 / 365) - 1 : null;
-                        const iTotalDaily = iBaseDaily != null && iSpreadDaily != null ? iBaseDaily + iSpreadDaily : null;
-                        return (
-                          <PreviewItemCard
-                            key={item.receivable_id}
-                            item={item}
-                            face={face}
-                            present={present}
-                            discount={face - present}
-                            baseDaily={iBaseDaily}
-                            spreadDaily={iSpreadDaily}
-                            totalDaily={iTotalDaily}
-                            fmtPct={fmtPct}
-                            formatCurrency={formatCurrency}
-                            exchangeRate={exchangeRate}
-                          />
-                        );
-                      })}
+          ) : (
+            (() => {
+              const totalFace = detailBatch.items.reduce((s, i) => s + Number(i.face_value), 0);
+              const totalPresent = detailBatch.items.reduce((s, i) => s + Number(i.present_value), 0);
+              const { fmtPct } = buildRatePanel(detailBatch.items);
+              return (
+                <>
+                  <ModalHeader>
+                    <div className="flex items-center gap-3">
+                      <ModalTitle>Lote {detailBatch.id}</ModalTitle>
+                      <Badge color={BATCH_STATUS_COLOR[detailBatch.status] ?? "neutral"} size="sm">
+                        {BATCH_STATUS_LABEL[detailBatch.status] ?? detailBatch.status}
+                      </Badge>
                     </div>
-                    <div className="flex-[2] min-w-0">
-                      <RatePanel
-                        items={detailBatch.items}
-                        totalFace={totalFace}
-                        totalPresent={totalPresent}
-                        totalReceivables={detailBatch.total_receivables}
-                        exchangeRate={exchangeRate}
-                      />
+                    <ModalDescription>
+                      {detailBatch.assignor.fantasy_name ?? detailBatch.assignor.social_reason} · {detailBatch.total_receivables} título(s)
+                    </ModalDescription>
+                  </ModalHeader>
+                  <div className="px-6 pb-2">
+                    <div className="flex items-start gap-5">
+                      <div className="max-h-[480px] min-w-0 flex-[3] space-y-2 overflow-y-auto pr-1">
+                        {detailBatch.items.map((item) => {
+                          const face = Number(item.face_value);
+                          const present = Number(item.present_value);
+                          const iBase = item.base_rate_annual != null ? Number(item.base_rate_annual) : null;
+                          const iSpread = item.spread_annual != null ? Number(item.spread_annual) : null;
+                          const iBaseDaily = iBase != null && iBase > 0 ? Math.pow(1 + iBase, 1 / 365) - 1 : null;
+                          const iSpreadDaily = iSpread != null && iSpread > 0 ? Math.pow(1 + iSpread, 1 / 365) - 1 : null;
+                          const iTotalDaily = iBaseDaily != null && iSpreadDaily != null ? iBaseDaily + iSpreadDaily : null;
+                          return (
+                            <PreviewItemCard
+                              key={item.receivable_id}
+                              item={item}
+                              face={face}
+                              present={present}
+                              discount={face - present}
+                              baseDaily={iBaseDaily}
+                              spreadDaily={iSpreadDaily}
+                              totalDaily={iTotalDaily}
+                              fmtPct={fmtPct}
+                              formatCurrency={formatCurrency}
+                              exchangeRate={exchangeRate}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="min-w-0 flex-[2]">
+                        <RatePanel
+                          items={detailBatch.items}
+                          totalFace={totalFace}
+                          totalPresent={totalPresent}
+                          totalReceivables={detailBatch.total_receivables}
+                          exchangeRate={exchangeRate}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <ModalFooter>
-                  <Button variant="outline" color="neutral" onClick={() => setDetailOpen(false)}>Fechar</Button>
-                  {detailBatch.status === "pending" && (
-                    <Button onClick={handleQueueFromDetail} isLoading={isQueuingDetail} icon="send">
-                      Solicitar Antecipação
+                  <ModalFooter>
+                    <Button variant="outline" color="neutral" onClick={() => setDetailOpen(false)}>
+                      Fechar
                     </Button>
-                  )}
-                </ModalFooter>
-              </>
-            );
-          })()}
+                    {detailBatch.status === "pending" && (
+                      <Button onClick={handleQueueFromDetail} isLoading={isQueuingDetail} icon="send">
+                        Solicitar Antecipação
+                      </Button>
+                    )}
+                  </ModalFooter>
+                </>
+              );
+            })()
+          )}
         </ModalContent>
       </Modal>
 
       {/* ── Wizard modal ──────────────────────────────────────────────────── */}
       <Modal open={wizardOpen} onOpenChange={handleCloseWizard} size="xl">
         <ModalContent onClose={handleCloseWizard} className="h-[90vh]">
-
           {/* Stepper — hidden on success */}
           {step !== "success" && <WizardStepper step={step} />}
 
@@ -752,37 +797,38 @@ export function LotesView({
               <ModalHeader>
                 <ModalTitle>Selecionar Cedente</ModalTitle>
                 <ModalDescription>
-                  Escolha a empresa titular dos recebíveis que serão antecipados. Apenas empresas com títulos disponíveis podem ter lotes criados.
+                  Escolha a empresa titular dos recebíveis que serão antecipados. Apenas empresas com títulos disponíveis podem ter lotes
+                  criados.
                 </ModalDescription>
               </ModalHeader>
 
               {/* Search */}
               <div className="px-6 pb-3">
                 <div className="relative">
-                  <Icon name="search" size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-3 pointer-events-none" />
+                  <Icon name="search" size={15} className="text-fg-3 pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="Buscar por nome ou CNPJ…"
                     value={assignorSearch}
                     onChange={(e) => setAssignorSearch(e.target.value)}
-                    className="w-full h-10 rounded-xl border-[0.5px] border-border-default bg-surface pl-9 pr-4 text-[13px] text-fg-1 placeholder:text-fg-disabled outline-none focus:border-brand-blue-400 focus:ring-2 focus:ring-brand-blue-100 transition-all"
+                    className="border-border-default bg-surface text-fg-1 placeholder:text-fg-disabled focus:border-brand-blue-400 focus:ring-brand-blue-100 h-10 w-full rounded-xl border-[0.5px] pr-4 pl-9 text-[13px] transition-all outline-none focus:ring-2"
                   />
                 </div>
               </div>
 
               {/* Company list */}
-              <div className="px-6 pt-1 pb-3 space-y-2 flex-1 overflow-y-auto">
+              <div className="flex-1 space-y-2 overflow-y-auto px-6 pt-1 pb-3">
                 {!assignorSearch.trim() ? (
                   <div className="flex flex-col items-center gap-2 py-8 text-center">
                     <Icon name="search" size={20} className="text-fg-disabled" />
-                    <p className="text-sm text-fg-3">Digite o nome ou CNPJ para buscar cedentes.</p>
+                    <p className="text-fg-3 text-sm">Digite o nome ou CNPJ para buscar cedentes.</p>
                   </div>
                 ) : isSearching ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="w-5 h-5 rounded-full border-2 border-border-default border-t-brand-blue-400 animate-spin" />
+                    <div className="border-border-default border-t-brand-blue-400 h-5 w-5 animate-spin rounded-full border-2" />
                   </div>
                 ) : searchResults.length === 0 ? (
-                  <p className="text-sm text-fg-3 text-center py-6">Nenhuma empresa encontrada.</p>
+                  <p className="text-fg-3 py-6 text-center text-sm">Nenhuma empresa encontrada.</p>
                 ) : (
                   searchResults.map((company) => (
                     <AssignorCard
@@ -796,13 +842,10 @@ export function LotesView({
               </div>
 
               <ModalFooter>
-                <Button variant="outline" color="neutral" onClick={handleCloseWizard}>Cancelar</Button>
-                <Button
-                  onClick={handleAssignorNext}
-                  disabled={!selectedAssignorId}
-                  isLoading={isLoadingReceivables}
-                  iconRight="arrowRight"
-                >
+                <Button variant="outline" color="neutral" onClick={handleCloseWizard}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleAssignorNext} disabled={!selectedAssignorId} isLoading={isLoadingReceivables} iconRight="arrowRight">
                   Próximo
                 </Button>
               </ModalFooter>
@@ -815,50 +858,52 @@ export function LotesView({
               <ModalHeader>
                 <ModalTitle>Selecionar Recebíveis</ModalTitle>
                 <ModalDescription>
-                  Selecione os títulos disponíveis que farão parte deste lote. Você pode incluir todos ou escolher individualmente. O valor líquido será calculado na próxima etapa.
+                  Selecione os títulos disponíveis que farão parte deste lote. Você pode incluir todos ou escolher individualmente. O valor
+                  líquido será calculado na próxima etapa.
                 </ModalDescription>
               </ModalHeader>
 
-              <div className="px-6 pb-3 flex-1 overflow-y-auto space-y-1">
+              <div className="flex-1 space-y-1 overflow-y-auto px-6 pb-3">
                 {availableReceivables.length === 0 ? (
-                  <p className="text-sm text-fg-3 py-8 text-center">Nenhum recebível disponível para este cedente.</p>
+                  <p className="text-fg-3 py-8 text-center text-sm">Nenhum recebível disponível para este cedente.</p>
                 ) : (
                   <>
-                    <div className="flex items-center justify-between py-2.5 border-b border-border-subtle mb-1 sticky top-0 bg-white z-10">
+                    <div className="border-border-subtle sticky top-0 z-10 mb-1 flex items-center justify-between border-b bg-white py-2.5">
                       <Checkbox
                         label="Selecionar todos"
                         checked={selectedReceivableIds.size === availableReceivables.length && availableReceivables.length > 0}
                         onChange={toggleAll}
                       />
-                      <span className="text-xs text-fg-3">
-                        {selectedReceivableIds.size} de {availableReceivables.length} · {formatCurrency(
-                          availableReceivables
-                            .filter((r) => selectedReceivableIds.has(r.id))
-                            .reduce((s, r) => s + Number(r.face_value), 0),
-                          "BRL"
+                      <span className="text-fg-3 text-xs">
+                        {selectedReceivableIds.size} de {availableReceivables.length} ·{" "}
+                        {formatCurrency(
+                          availableReceivables.filter((r) => selectedReceivableIds.has(r.id)).reduce((s, r) => s + Number(r.face_value), 0),
+                          "BRL",
                         )}
                       </span>
                     </div>
                     {availableReceivables.map((r) => (
                       <div
                         key={r.id}
-                        className={`flex items-center justify-between rounded-xl px-3 py-3 cursor-pointer transition-colors
-                          ${selectedReceivableIds.has(r.id) ? "bg-brand-blue-50/60" : "hover:bg-surface-alt/50"}`}
+                        className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-3 transition-colors ${selectedReceivableIds.has(r.id) ? "bg-brand-blue-50/60" : "hover:bg-surface-alt/50"}`}
                         onClick={() => toggleReceivable(r.id)}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex min-w-0 items-center gap-3">
                           <Checkbox checked={selectedReceivableIds.has(r.id)} onChange={() => toggleReceivable(r.id)} />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-medium text-fg-1 truncate">{r.drawee.social_reason}</p>
-                              <Badge color="neutral" size="sm">{r.product_type.name}</Badge>
+                              <p className="text-fg-1 truncate text-sm font-medium">{r.drawee.social_reason}</p>
+                              <Badge color="neutral" size="sm">
+                                {r.product_type.name}
+                              </Badge>
                             </div>
-                            <p className="text-xs text-fg-3">
-                              Venc. {new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR")} · Spread {(Number(r.product_type.spread) * 100).toFixed(2)}% a.a. · {r.invoice_key.slice(0, 16)}…
+                            <p className="text-fg-3 text-xs">
+                              Venc. {new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR")} · Spread{" "}
+                              {(Number(r.product_type.spread) * 100).toFixed(2)}% a.a. · {r.invoice_key.slice(0, 16)}…
                             </p>
                           </div>
                         </div>
-                        <span className="text-sm font-semibold text-fg-1 whitespace-nowrap ml-4">
+                        <span className="text-fg-1 ml-4 text-sm font-semibold whitespace-nowrap">
                           {formatCurrency(r.face_value, r.currency_code)}
                         </span>
                       </div>
@@ -868,13 +913,10 @@ export function LotesView({
               </div>
 
               <ModalFooter>
-                <Button variant="outline" color="neutral" onClick={() => setStep("assignor")}>Voltar</Button>
-                <Button
-                  onClick={handleSimulate}
-                  disabled={selectedReceivableIds.size === 0}
-                  isLoading={isCreating}
-                  icon="calculator"
-                >
+                <Button variant="outline" color="neutral" onClick={() => setStep("assignor")}>
+                  Voltar
+                </Button>
+                <Button onClick={handleSimulate} disabled={selectedReceivableIds.size === 0} isLoading={isCreating} icon="calculator">
                   Simular
                 </Button>
               </ModalFooter>
@@ -882,84 +924,88 @@ export function LotesView({
           )}
 
           {/* ── Step 3: Preview ─────────────────────────────────────────── */}
-          {step === "preview" && preview && (() => {
-            const totalFace = Number(preview.total_face_value);
-            const totalPresent = Number(preview.total_present_value);
-            const { fmtPct } = buildRatePanel(preview.items);
+          {step === "preview" &&
+            preview &&
+            (() => {
+              const totalFace = Number(preview.total_face_value);
+              const totalPresent = Number(preview.total_present_value);
+              const { fmtPct } = buildRatePanel(preview.items);
 
-            return (
-              <>
-                <ModalHeader>
-                  <ModalTitle>Simulação do Lote</ModalTitle>
-                  <ModalDescription>
-                    Confira os valores calculados. As taxas são apuradas com base na Selic atual mais o spread operacional. Após confirmar, o lote entra na fila de processamento.
-                  </ModalDescription>
-                </ModalHeader>
+              return (
+                <>
+                  <ModalHeader>
+                    <ModalTitle>Simulação do Lote</ModalTitle>
+                    <ModalDescription>
+                      Confira os valores calculados. As taxas são apuradas com base na Selic atual mais o spread operacional. Após
+                      confirmar, o lote entra na fila de processamento.
+                    </ModalDescription>
+                  </ModalHeader>
 
-                <div className="px-6 pb-2 flex-1 overflow-hidden">
-                  <div className="flex gap-5 h-full">
-                    <div className="flex-[3] min-w-0 space-y-2 overflow-y-auto pr-1">
-                      {preview.items.map((item) => {
-                        const face = Number(item.face_value);
-                        const present = Number(item.present_value);
-                        const iBase = item.base_rate_annual != null ? Number(item.base_rate_annual) : null;
-                        const iSpread = item.spread_annual != null ? Number(item.spread_annual) : null;
-                        const iBaseDaily = iBase != null && iBase > 0 ? Math.pow(1 + iBase, 1 / 365) - 1 : null;
-                        const iSpreadDaily = iSpread != null && iSpread > 0 ? Math.pow(1 + iSpread, 1 / 365) - 1 : null;
-                        const iTotalDaily = iBaseDaily != null && iSpreadDaily != null ? iBaseDaily + iSpreadDaily : null;
-                        return (
-                          <PreviewItemCard
-                            key={item.receivable_id}
-                            item={item}
-                            face={face}
-                            present={present}
-                            discount={face - present}
-                            baseDaily={iBaseDaily}
-                            spreadDaily={iSpreadDaily}
-                            totalDaily={iTotalDaily}
-                            fmtPct={fmtPct}
-                            formatCurrency={formatCurrency}
-                            exchangeRate={exchangeRate}
-                          />
-                        );
-                      })}
-                    </div>
-                    <div className="flex-[2] min-w-0 overflow-y-auto">
-                      <RatePanel
-                        items={preview.items}
-                        totalFace={totalFace}
-                        totalPresent={totalPresent}
-                        totalReceivables={preview.total_receivables}
-                        exchangeRate={exchangeRate}
-                      />
+                  <div className="flex-1 overflow-hidden px-6 pb-2">
+                    <div className="flex h-full gap-5">
+                      <div className="min-w-0 flex-[3] space-y-2 overflow-y-auto pr-1">
+                        {preview.items.map((item) => {
+                          const face = Number(item.face_value);
+                          const present = Number(item.present_value);
+                          const iBase = item.base_rate_annual != null ? Number(item.base_rate_annual) : null;
+                          const iSpread = item.spread_annual != null ? Number(item.spread_annual) : null;
+                          const iBaseDaily = iBase != null && iBase > 0 ? Math.pow(1 + iBase, 1 / 365) - 1 : null;
+                          const iSpreadDaily = iSpread != null && iSpread > 0 ? Math.pow(1 + iSpread, 1 / 365) - 1 : null;
+                          const iTotalDaily = iBaseDaily != null && iSpreadDaily != null ? iBaseDaily + iSpreadDaily : null;
+                          return (
+                            <PreviewItemCard
+                              key={item.receivable_id}
+                              item={item}
+                              face={face}
+                              present={present}
+                              discount={face - present}
+                              baseDaily={iBaseDaily}
+                              spreadDaily={iSpreadDaily}
+                              totalDaily={iTotalDaily}
+                              fmtPct={fmtPct}
+                              formatCurrency={formatCurrency}
+                              exchangeRate={exchangeRate}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="min-w-0 flex-[2] overflow-y-auto">
+                        <RatePanel
+                          items={preview.items}
+                          totalFace={totalFace}
+                          totalPresent={totalPresent}
+                          totalReceivables={preview.total_receivables}
+                          exchangeRate={exchangeRate}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <ModalFooter>
-                  <Button variant="outline" color="neutral" onClick={() => setStep("receivables")}>Voltar</Button>
-                  <Button onClick={handleQueue} isLoading={isQueuing} icon="send">Solicitar Antecipação</Button>
-                </ModalFooter>
-              </>
-            );
-          })()}
+                  <ModalFooter>
+                    <Button variant="outline" color="neutral" onClick={() => setStep("receivables")}>
+                      Voltar
+                    </Button>
+                    <Button onClick={handleQueue} isLoading={isQueuing} icon="send">
+                      Solicitar Antecipação
+                    </Button>
+                  </ModalFooter>
+                </>
+              );
+            })()}
 
           {/* ── Step 4: Success ─────────────────────────────────────────── */}
           {step === "success" && (
-            <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 px-6 pb-6">
-              <div className="w-16 h-16 rounded-full bg-srm-success-50 border border-srm-success-100 flex items-center justify-center">
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 pb-6 text-center">
+              <div className="bg-srm-success-50 border-srm-success-100 flex h-16 w-16 items-center justify-center rounded-full border">
                 <Icon name="checkCircle" size={32} className="text-srm-success-500" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-fg-1">Solicitação Enviada</p>
-                <p className="text-sm text-fg-3 mt-1">
-                  O lote foi enfileirado e será processado em breve. Acompanhe o status na listagem.
-                </p>
+                <p className="text-fg-1 text-lg font-semibold">Solicitação Enviada</p>
+                <p className="text-fg-3 mt-1 text-sm">O lote foi enfileirado e será processado em breve. Acompanhe o status na listagem.</p>
               </div>
               <Button onClick={handleCloseWizard}>Concluir</Button>
             </div>
           )}
-
         </ModalContent>
       </Modal>
     </div>

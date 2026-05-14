@@ -18,15 +18,15 @@ export function Switch({ disabled, className, label, hint, color = "brand", ...p
   };
 
   return (
-    <label className={cn("group flex gap-3 items-start", disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer", className)}>
-      <div className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors mt-[3px]">
-        <input 
-          type="checkbox" 
-          disabled={disabled} 
-          className="peer sr-only" 
-          {...props} 
+    <label className={cn("group flex items-start gap-3", disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer", className)}>
+      <div className="relative mt-[3px] inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors">
+        <input type="checkbox" disabled={disabled} className="peer sr-only" {...props} />
+        <div
+          className={cn(
+            "bg-border-strong border-border-default h-6 w-11 rounded-full border-[0.5px] shadow-inner transition-colors duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2",
+            colorStyles[color],
+          )}
         />
-        <div className={cn("h-6 w-11 rounded-full bg-border-strong border-[0.5px] border-border-default shadow-inner transition-colors duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2", colorStyles[color])} />
         <div className="absolute left-[2px] h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
       </div>
 

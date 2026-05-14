@@ -15,37 +15,38 @@ const columns = [
     header: "Par de Moedas",
     enableColumnFilter: true,
     cell: ({ row }: { row: ExchangeRate }) => (
-      <span className="font-bold">{row.from_currency}/{row.to_currency}</span>
-    )
+      <span className="font-bold">
+        {row.from_currency}/{row.to_currency}
+      </span>
+    ),
   },
-  { 
-    id: "rate", 
-    header: "Taxa", 
-    cell: ({ row }: { row: ExchangeRate }) => Number(row.rate).toFixed(4) 
+  {
+    id: "rate",
+    header: "Taxa",
+    cell: ({ row }: { row: ExchangeRate }) => Number(row.rate).toFixed(4),
   },
-  { 
-    id: "source", 
+  {
+    id: "source",
     header: "Fonte",
     cell: ({ row }: { row: ExchangeRate }) => (
       <Badge color="neutral" size="sm" variant="outline" className="capitalize">
         {row.source}
       </Badge>
-    )
+    ),
   },
-  { 
-    id: "collected_at", 
+  {
+    id: "collected_at",
     header: "Coletado em",
-    cell: ({ row }: { row: ExchangeRate }) => 
-      new Date(row.collected_at).toLocaleString("pt-BR")
+    cell: ({ row }: { row: ExchangeRate }) => new Date(row.collected_at).toLocaleString("pt-BR"),
   },
-  { 
-    id: "status", 
+  {
+    id: "status",
     header: "Status",
     cell: ({ row }: { row: ExchangeRate }) => (
       <Badge color={row.is_stale ? "danger" : "success"} size="sm" className="font-bold">
         {row.is_stale ? "STALE" : "ATIVO"}
       </Badge>
-    )
+    ),
   },
 ];
 
@@ -70,7 +71,7 @@ export function CambioView({ initialData, fetchRates, triggerCollect }: Props) {
       try {
         const result = await fetchRates();
         setData(result);
-      } catch (err: any) {
+      } catch {
         toast.error("Erro ao atualizar taxas.");
       }
     });
@@ -82,33 +83,33 @@ export function CambioView({ initialData, fetchRates, triggerCollect }: Props) {
       await triggerCollect();
       toast.success("Coleta de taxa disparada com sucesso.");
       handleRefresh();
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao disparar coleta.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao disparar coleta.");
     } finally {
       setIsCollecting(false);
     }
   };
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-end justify-between shrink-0">
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex shrink-0 items-end justify-between">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Câmbio</h1>
+          <h1 className="t-h3 text-fg-1 !text-2xl tracking-tight">Câmbio</h1>
           <p className="t-body !text-fg-3 mt-0.5">Histórico de taxas de câmbio coletadas para operações multi-moedas.</p>
         </motion.div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            color="neutral" 
-            className="h-9 px-4 text-xs font-bold" 
+          <Button
+            variant="outline"
+            color="neutral"
+            className="h-9 px-4 text-xs font-bold"
             icon="refresh-cw"
             onClick={handleRefresh}
             isLoading={isPending}
           >
             Atualizar Lista
           </Button>
-          <Button 
-            className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10" 
+          <Button
+            className="shadow-brand-blue-500/10 h-9 px-4 text-xs font-bold shadow-md"
             icon="zap"
             onClick={handleCollect}
             isLoading={isCollecting}

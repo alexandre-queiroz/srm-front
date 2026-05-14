@@ -13,10 +13,5 @@ async function fetchProductTypes(): Promise<ProductType[]> {
 export default async function ProdutosPage() {
   const initialData = await safeCall(() => fetchProductTypes(), [] as ProductType[]);
 
-  return (
-    <ProdutosView
-      initialData={initialData}
-      fetchProductTypes={fetchProductTypes}
-    />
-  );
+  return <ProdutosView initialData={initialData} fetchProductTypes={fetchProductTypes} />;
 }

@@ -4,23 +4,13 @@ import { listCurrencies, createCurrency } from "@/repositories/currency-reposito
 import type { Currency } from "@/types";
 import { MoedasView } from "./_view";
 
-async function fetchCurrencies(params?: {
-  code?: string;
-  code_op?: string;
-  name?: string;
-  name_op?: string;
-}): Promise<Currency[]> {
+async function fetchCurrencies(params?: { code?: string; code_op?: string; name?: string; name_op?: string }): Promise<Currency[]> {
   "use server";
   const token = await getAuthToken();
   return listCurrencies(token, params);
 }
 
-async function addCurrency(payload: {
-  code: string;
-  name: string;
-  symbol: string;
-  is_base: boolean;
-}): Promise<Currency> {
+async function addCurrency(payload: { code: string; name: string; symbol: string; is_base: boolean }): Promise<Currency> {
   "use server";
   const token = await getAuthToken();
   return createCurrency(token, payload);
@@ -29,11 +19,5 @@ async function addCurrency(payload: {
 export default async function MoedasPage() {
   const initialData = await safeCall(() => fetchCurrencies(), [] as Currency[]);
 
-  return (
-    <MoedasView
-      initialData={initialData}
-      fetchCurrencies={fetchCurrencies}
-      addCurrency={addCurrency}
-    />
-  );
+  return <MoedasView initialData={initialData} fetchCurrencies={fetchCurrencies} addCurrency={addCurrency} />;
 }

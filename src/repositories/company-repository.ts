@@ -15,13 +15,6 @@ export async function listCompanies(
   return apiFetchJson<Company[]>(`/v1/companies?${qs}`, {}, token);
 }
 
-export async function createCompany(
-  token: string,
-  payload: { cnpj: string; name: string },
-): Promise<Company> {
-  return apiFetchJson<Company>(
-    `/v1/companies`,
-    { method: "POST", body: JSON.stringify(payload) },
-    token,
-  );
+export async function createCompany(token: string, payload: { cnpj: string; name: string }): Promise<Company> {
+  return apiFetchJson<Company>(`/v1/companies`, { method: "POST", body: JSON.stringify(payload) }, token);
 }

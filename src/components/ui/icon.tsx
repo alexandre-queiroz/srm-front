@@ -4,14 +4,13 @@ import React, { useState, useEffect } from "react";
 import { type LucideProps } from "lucide-react";
 import dynamicIconImports from "lucide-react/dynamicIconImports";
 
-const toKebabCase = (str: string) =>
-  str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+const toKebabCase = (str: string) => str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 
 const nameOverrides: Record<string, string> = {
-  file:     "file-text",
+  file: "file-text",
   trending: "trending-up",
-  chart:    "bar-chart-2",
-  loader2:  "loader-circle",
+  chart: "bar-chart-2",
+  loader2: "loader-circle",
   notEqual: "ban",
 };
 
@@ -24,22 +23,17 @@ export interface IconProps extends Omit<LucideProps, "ref" | "stroke"> {
   stroke?: number | string;
 }
 
-export default function Icon({
-  name,
-  color,
-  size = 20,
-  stroke = 1.5,
-  className,
-  ...rest
-}: IconProps) {
+export default function Icon({ name, color, size = 20, stroke = 1.5, className, ...rest }: IconProps) {
   const normalizedName = (nameOverrides[name] ?? toKebabCase(name)) as keyof typeof dynamicIconImports;
 
-  const cached = componentCache.get(normalizedName) ?? null;
-  const [IconComponent, setIconComponent] = useState<React.ComponentType<LucideProps> | null>(cached);
+  const [IconComponent, setIconComponent] = useState<React.ComponentType<LucideProps> | null>(
+    () => componentCache.get(normalizedName) ?? null,
+  );
 
   useEffect(() => {
     if (componentCache.has(normalizedName)) {
-      setIconComponent(componentCache.get(normalizedName)!);
+      const cached = componentCache.get(normalizedName)!;
+      Promise.resolve().then(() => setIconComponent(() => cached));
       return;
     }
 
@@ -61,20 +55,9 @@ export default function Icon({
 
   if (!IconComponent) {
     return (
-      <span
-        className={`inline-block animate-pulse rounded bg-surface-alt/40 ${className ?? ""}`}
-        style={{ width: size, height: size }}
-      />
+      <span className={`bg-surface-alt/40 inline-block animate-pulse rounded ${className ?? ""}`} style={{ width: size, height: size }} />
     );
   }
 
-  return (
-    <IconComponent
-      color={color}
-      size={size}
-      strokeWidth={stroke}
-      className={className}
-      {...rest}
-    />
-  );
+  return <IconComponent color={color} size={size} strokeWidth={stroke} className={className} {...rest} />;
 }

@@ -14,9 +14,7 @@ interface LoginResponse {
   expires_in: number;
 }
 
-export async function loginAction(
-  credentials: LoginPayload,
-): Promise<{ success: true } | { error: string }> {
+export async function loginAction(credentials: LoginPayload): Promise<{ success: true } | { error: string }> {
   try {
     const data = await apiFetchJson<LoginResponse>("/v1/auth/login", {
       method: "POST",
@@ -33,11 +31,7 @@ export async function loginAction(
     });
 
     try {
-      const me = await apiFetchJson<{ id: string; name: string; email: string }>(
-        "/v1/auth/me",
-        {},
-        data.access_token,
-      );
+      const me = await apiFetchJson<{ id: string; name: string; email: string }>("/v1/auth/me", {}, data.access_token);
       cookieStore.set(COOKIE_NAMES.USER_INFO, JSON.stringify({ name: me.name, id: me.id }), {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",

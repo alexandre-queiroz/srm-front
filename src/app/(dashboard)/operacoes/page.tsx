@@ -61,7 +61,7 @@ export default async function OperacoesPage() {
     safeCall(() => fetchCurrencies(), [] as Currency[]),
   ]);
 
-  const initialData = normalize(rawData as any);
+  const initialData = normalize(rawData);
 
   return (
     <OperacoesView

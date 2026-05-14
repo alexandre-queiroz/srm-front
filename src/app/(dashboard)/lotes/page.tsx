@@ -13,19 +13,14 @@ async function fetchCurrentRate(): Promise<ExchangeRate> {
   return getCurrentRate(token);
 }
 
-async function fetchBatches(params: { 
-  page: number; 
-  pageSize: number; 
-  status?: string; 
-  assignor_id?: string;
-}): Promise<Batch[]> {
+async function fetchBatches(params: { page: number; pageSize: number; status?: string; assignor_id?: string }): Promise<Batch[]> {
   "use server";
   const token = await getAuthToken();
-  return listBatches(token, { 
-    page: params.page, 
+  return listBatches(token, {
+    page: params.page,
     page_size: params.pageSize,
     status: params.status,
-    assignor_id: params.assignor_id
+    assignor_id: params.assignor_id,
   });
 }
 
@@ -35,7 +30,6 @@ async function fetchCompanies(social_reason?: string): Promise<Company[]> {
   return listCompanies(token, { social_reason, limit: 50 });
 }
 
-
 async function fetchReceivablesByAssignor(assignorId: string, page: number, pageSize: number): Promise<Receivable[]> {
   "use server";
   const token = await getAuthToken();
@@ -43,19 +37,13 @@ async function fetchReceivablesByAssignor(assignorId: string, page: number, page
   return result.items;
 }
 
-async function simulateBatchAction(
-  assignorId: string,
-  receivableIds: string[],
-): Promise<BatchPreview> {
+async function simulateBatchAction(assignorId: string, receivableIds: string[]): Promise<BatchPreview> {
   "use server";
   const token = await getAuthToken();
   return simulateBatch(token, { assignor_id: assignorId, receivable_ids: receivableIds });
 }
 
-async function createAndQueueBatchAction(
-  assignorId: string,
-  receivableIds: string[],
-): Promise<Batch> {
+async function createAndQueueBatchAction(assignorId: string, receivableIds: string[]): Promise<Batch> {
   "use server";
   const token = await getAuthToken();
   const batch = await createBatch(token, { assignor_id: assignorId, receivable_ids: receivableIds });
@@ -91,4 +79,3 @@ export default async function LotesPage() {
     />
   );
 }
-

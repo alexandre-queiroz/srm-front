@@ -19,7 +19,7 @@ export function Modal({ open, onOpenChange, children, size = "md" }: ModalProps)
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    Promise.resolve().then(() => setMounted(true));
   }, []);
 
   useEffect(() => {

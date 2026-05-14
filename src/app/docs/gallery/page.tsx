@@ -44,10 +44,10 @@ export default function ComponentGallery() {
   const filteredData = allData.filter((row) => {
     return Object.entries(filters).every(([key, filterObj]) => {
       if (!filterObj || !filterObj.value) return true;
-      
+
       const rowVal = String(row[key as keyof typeof row]).toLowerCase();
       const searchVal = filterObj.value.toLowerCase();
-      
+
       if (filterObj.operator === "startswith") return rowVal.startsWith(searchVal);
       if (filterObj.operator === "endswith") return rowVal.endsWith(searchVal);
       if (filterObj.operator === "equal") return rowVal === searchVal;
@@ -55,24 +55,24 @@ export default function ComponentGallery() {
       return rowVal.includes(searchVal); // default contains
     });
   });
-  
+
   const totalItems = filteredData.length;
   const paginatedData = filteredData.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 
-  const columns: ColumnDef<typeof allData[0]>[] = [
+  const columns: ColumnDef<(typeof allData)[0]>[] = [
     {
       id: "id",
       header: "ID",
       enableColumnFilter: true,
       filterType: "text",
-      cell: ({ row }) => <span className="text-brand-blue-600 font-medium whitespace-nowrap">{row.id}</span>
+      cell: ({ row }) => <span className="text-brand-blue-600 font-medium whitespace-nowrap">{row.id}</span>,
     },
     {
       id: "cedente",
       header: "Cedente",
       enableColumnFilter: true,
       filterType: "text",
-      cell: ({ row }) => row.cedente
+      cell: ({ row }) => row.cedente,
     },
     {
       id: "status",
@@ -80,25 +80,23 @@ export default function ComponentGallery() {
       enableColumnFilter: true,
       filterType: "enum",
       cell: ({ row }) => (
-        <Badge color={row.status === "Liquidado" ? "success" : row.status === "Rejeitado" ? "danger" : "warning"}>
-          {row.status}
-        </Badge>
-      )
+        <Badge color={row.status === "Liquidado" ? "success" : row.status === "Rejeitado" ? "danger" : "warning"}>{row.status}</Badge>
+      ),
     },
     {
       id: "data",
       header: "Data",
       enableColumnFilter: true,
       filterType: "date",
-      cell: ({ row }) => row.data
+      cell: ({ row }) => row.data,
     },
     {
       id: "valor",
       header: "Valor",
       enableColumnFilter: true,
       filterType: "number",
-      cell: ({ row }) => <div className="font-medium">{row.valor}</div>
-    }
+      cell: ({ row }) => <div className="font-medium">{row.valor}</div>,
+    },
   ];
 
   return (
@@ -463,23 +461,32 @@ export default function ComponentGallery() {
               <Spinner size="lg" color="success" />
               <Spinner size="lg" color="warning" />
               <Spinner size="lg" color="danger" />
-              <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle">
+              <div className="bg-surface-sunken border-border-subtle rounded-md border p-2">
                 <Spinner size="md" color="neutral" />
               </div>
             </div>
-            
-            <p className="text-fg-2 text-xs font-medium tracking-wider uppercase pt-4">Progress Bars</p>
+
+            <p className="text-fg-2 pt-4 text-xs font-medium tracking-wider uppercase">Progress Bars</p>
             <div className="w-full max-w-sm space-y-5">
               <div className="space-y-1.5">
-                <div className="flex justify-between text-xs text-fg-3"><span className="font-medium">Processando Dados (SM)</span><span>35%</span></div>
+                <div className="text-fg-3 flex justify-between text-xs">
+                  <span className="font-medium">Processando Dados (SM)</span>
+                  <span>35%</span>
+                </div>
                 <Progress value={35} size="sm" color="brand" />
               </div>
               <div className="space-y-1.5">
-                <div className="flex justify-between text-xs text-fg-3"><span className="font-medium">Upload de Arquivo (MD)</span><span>60%</span></div>
+                <div className="text-fg-3 flex justify-between text-xs">
+                  <span className="font-medium">Upload de Arquivo (MD)</span>
+                  <span>60%</span>
+                </div>
                 <Progress value={60} size="md" color="accent" />
               </div>
               <div className="space-y-1.5">
-                <div className="flex justify-between text-xs text-fg-3"><span className="font-medium">Concluído (LG)</span><span>100%</span></div>
+                <div className="text-fg-3 flex justify-between text-xs">
+                  <span className="font-medium">Concluído (LG)</span>
+                  <span>100%</span>
+                </div>
                 <Progress value={100} size="lg" color="success" />
               </div>
             </div>
@@ -536,7 +543,7 @@ export default function ComponentGallery() {
               setPageIndex(0);
             }}
             onFilterChange={(colId, val, op) => {
-              setFilters(prev => ({ ...prev, [colId]: { value: val, operator: op } }));
+              setFilters((prev) => ({ ...prev, [colId]: { value: val, operator: op } }));
               setPageIndex(0); // reset page on filter
             }}
           />
@@ -591,12 +598,12 @@ export default function ComponentGallery() {
       {/* Advanced UI Section */}
       <section className="space-y-8">
         <h2 className="t-h3 border-border-subtle border-b pb-2">Componentes Avançados</h2>
-        
+
         <div className="grid grid-cols-1 gap-12">
           {/* Tabs Showcase */}
           <div className="space-y-6">
             <p className="text-fg-2 text-xs font-medium tracking-wider uppercase">Navegação (Tabs) - Cores Semânticas</p>
-            <div className="flex flex-wrap gap-6 items-start bg-white border-[0.5px] border-border-default shadow-xs p-6 rounded-2xl">
+            <div className="border-border-default flex flex-wrap items-start gap-6 rounded-2xl border-[0.5px] bg-white p-6 shadow-xs">
               <Tabs defaultValue="t1" color="brand" className="w-auto">
                 <TabsList>
                   <TabsTrigger value="t1">
@@ -607,14 +614,14 @@ export default function ComponentGallery() {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              
+
               <Tabs defaultValue="t1" color="accent" className="w-auto">
                 <TabsList>
                   <TabsTrigger value="t1">Accent</TabsTrigger>
                   <TabsTrigger value="t2">Inativo</TabsTrigger>
                 </TabsList>
               </Tabs>
-              
+
               <Tabs defaultValue="t1" color="success" className="w-auto">
                 <TabsList>
                   <TabsTrigger value="t1">Success</TabsTrigger>
@@ -645,11 +652,11 @@ export default function ComponentGallery() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
             {/* Switch Showcase */}
             <div className="space-y-6">
               <p className="text-fg-2 text-xs font-medium tracking-wider uppercase">Switches (Toggles) - Cores</p>
-              <div className="bg-white border-[0.5px] border-border-default shadow-xs p-6 rounded-2xl grid grid-cols-2 gap-y-6 gap-x-4">
+              <div className="border-border-default grid grid-cols-2 gap-x-4 gap-y-6 rounded-2xl border-[0.5px] bg-white p-6 shadow-xs">
                 <Switch defaultChecked color="brand" label="Brand" />
                 <Switch defaultChecked color="accent" label="Accent" />
                 <Switch defaultChecked color="success" label="Success" />
@@ -662,24 +669,56 @@ export default function ComponentGallery() {
             {/* Toasts Showcase */}
             <div className="space-y-6">
               <p className="text-fg-2 text-xs font-medium tracking-wider uppercase">Notificações (Toasts via Sonner)</p>
-              <div className="bg-white border-[0.5px] border-border-default shadow-xs p-6 rounded-2xl flex flex-wrap gap-4 items-center h-fit">
-                <Button variant="soft" color="brand" onClick={() => toast.info("Sistema atualizado", { description: "Uma nova versão está disponível."})}>Toast de Info</Button>
-                <Button variant="soft" color="success" onClick={() => toast.success("Operação concluída", { description: "Os fundos foram transferidos."})}>Toast de Sucesso</Button>
-                <Button variant="soft" color="warning" onClick={() => toast.warning("Atenção necessária", { description: "O limite de crédito está próximo."})}>Toast de Aviso</Button>
-                <Button variant="soft" color="danger" onClick={() => toast.error("Falha na liquidação", { description: "Verifique os dados da conta bancária."})}>Toast de Erro</Button>
-                <Button variant="outline" color="neutral" onClick={() => toast("Rascunho salvo", { action: { label: "Desfazer", onClick: () => console.log("undo") }})}>Toast Neutro c/ Ação</Button>
+              <div className="border-border-default flex h-fit flex-wrap items-center gap-4 rounded-2xl border-[0.5px] bg-white p-6 shadow-xs">
+                <Button
+                  variant="soft"
+                  color="brand"
+                  onClick={() => toast.info("Sistema atualizado", { description: "Uma nova versão está disponível." })}
+                >
+                  Toast de Info
+                </Button>
+                <Button
+                  variant="soft"
+                  color="success"
+                  onClick={() => toast.success("Operação concluída", { description: "Os fundos foram transferidos." })}
+                >
+                  Toast de Sucesso
+                </Button>
+                <Button
+                  variant="soft"
+                  color="warning"
+                  onClick={() => toast.warning("Atenção necessária", { description: "O limite de crédito está próximo." })}
+                >
+                  Toast de Aviso
+                </Button>
+                <Button
+                  variant="soft"
+                  color="danger"
+                  onClick={() => toast.error("Falha na liquidação", { description: "Verifique os dados da conta bancária." })}
+                >
+                  Toast de Erro
+                </Button>
+                <Button
+                  variant="outline"
+                  color="neutral"
+                  onClick={() => toast("Rascunho salvo", { action: { label: "Desfazer", onClick: () => console.log("undo") } })}
+                >
+                  Toast Neutro c/ Ação
+                </Button>
               </div>
             </div>
 
             {/* Modal Showcase */}
-            <div className="space-y-6 md:col-span-2 mt-4">
+            <div className="mt-4 space-y-6 md:col-span-2">
               <p className="text-fg-2 text-xs font-medium tracking-wider uppercase">Sobreposição (Modal / Dialog)</p>
-              <div className="bg-white border-[0.5px] border-border-default shadow-xs p-6 rounded-2xl flex items-center justify-between">
+              <div className="border-border-default flex items-center justify-between rounded-2xl border-[0.5px] bg-white p-6 shadow-xs">
                 <div>
-                  <h4 className="font-medium text-fg-1">Modal de Confirmação Premium</h4>
-                  <p className="text-sm text-fg-3">Animações framer-motion, backdrop-blur azul e bloqueio de scroll nativo.</p>
+                  <h4 className="text-fg-1 font-medium">Modal de Confirmação Premium</h4>
+                  <p className="text-fg-3 text-sm">Animações framer-motion, backdrop-blur azul e bloqueio de scroll nativo.</p>
                 </div>
-                <Button color="brand" onClick={() => setIsModalOpen(true)}>Abrir Modal Premium</Button>
+                <Button color="brand" onClick={() => setIsModalOpen(true)}>
+                  Abrir Modal Premium
+                </Button>
               </div>
             </div>
           </div>
@@ -691,25 +730,34 @@ export default function ComponentGallery() {
         <ModalContent onClose={() => setIsModalOpen(false)}>
           <ModalHeader>
             <ModalTitle>Antecipar Recebíveis</ModalTitle>
-            <ModalDescription>Você está prestes a enviar os títulos para análise de risco. Esta ação não pode ser desfeita.</ModalDescription>
+            <ModalDescription>
+              Você está prestes a enviar os títulos para análise de risco. Esta ação não pode ser desfeita.
+            </ModalDescription>
           </ModalHeader>
-          <div className="p-6 pt-0 space-y-4">
-            <div className="rounded-xl bg-surface-alt p-4 flex gap-4 items-center">
-              <div className="h-10 w-10 rounded-full bg-brand-blue-500/10 flex items-center justify-center text-brand-blue-600">
+          <div className="space-y-4 p-6 pt-0">
+            <div className="bg-surface-alt flex items-center gap-4 rounded-xl p-4">
+              <div className="bg-brand-blue-500/10 text-brand-blue-600 flex h-10 w-10 items-center justify-center rounded-full">
                 <Icon name="file-text" size={20} stroke={2} />
               </div>
               <div>
-                <p className="text-sm font-medium text-fg-1">R$ 250.000,00</p>
-                <p className="text-xs text-fg-3">Valor total bruto (14 títulos)</p>
+                <p className="text-fg-1 text-sm font-medium">R$ 250.000,00</p>
+                <p className="text-fg-3 text-xs">Valor total bruto (14 títulos)</p>
               </div>
             </div>
           </div>
           <ModalFooter>
-            <Button variant="soft" color="neutral" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button color="brand" onClick={() => {
-              setIsModalOpen(false);
-              toast.success("Antecipação solicitada com sucesso!");
-            }}>Confirmar Solicitação</Button>
+            <Button variant="soft" color="neutral" onClick={() => setIsModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              color="brand"
+              onClick={() => {
+                setIsModalOpen(false);
+                toast.success("Antecipação solicitada com sucesso!");
+              }}
+            >
+              Confirmar Solicitação
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

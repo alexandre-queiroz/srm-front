@@ -19,10 +19,5 @@ async function handleUpdateParam(key: string, value: string): Promise<SystemPara
 export default async function ParametrosPage() {
   const initialData = await safeCall(() => fetchParams(), [] as SystemParam[]);
 
-  return (
-    <ParametrosView
-      initialParams={initialData}
-      updateParam={handleUpdateParam}
-    />
-  );
+  return <ParametrosView initialParams={initialData} updateParam={handleUpdateParam} />;
 }

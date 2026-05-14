@@ -19,11 +19,5 @@ async function triggerCollect(): Promise<ExchangeRate> {
 export default async function CambioPage() {
   const initialData = await safeCall(() => fetchRates(), [] as ExchangeRate[]);
 
-  return (
-    <CambioView
-      initialData={initialData}
-      fetchRates={fetchRates}
-      triggerCollect={triggerCollect}
-    />
-  );
+  return <CambioView initialData={initialData} fetchRates={fetchRates} triggerCollect={triggerCollect} />;
 }

@@ -25,8 +25,7 @@ const columns = [
     id: "cnpj",
     header: "CNPJ",
     enableColumnFilter: true,
-    cell: ({ row }: { row: Company }) =>
-      row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"),
+    cell: ({ row }: { row: Company }) => row.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"),
   },
   {
     id: "created_at",
@@ -47,10 +46,7 @@ const columns = [
     header: "Ações",
     cell: () => (
       <div className="flex items-center gap-1">
-        <button
-          className="p-1 hover:bg-brand-blue-50 text-brand-blue-600 rounded-lg transition-colors cursor-pointer"
-          title="Editar"
-        >
+        <button className="hover:bg-brand-blue-50 text-brand-blue-600 cursor-pointer rounded-lg p-1 transition-colors" title="Editar">
           <Icon name="edit" size={16} />
         </button>
       </div>
@@ -103,14 +99,10 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
   };
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-end justify-between shrink-0">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Empresas</h1>
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex shrink-0 items-end justify-between">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <h1 className="t-h3 text-fg-1 !text-2xl tracking-tight">Empresas</h1>
           <p className="t-body !text-fg-3 mt-0.5">Gestão de cedentes e sacados cadastrados no sistema.</p>
         </motion.div>
 
@@ -125,7 +117,7 @@ export function CedentesView({ initialData, fetchCompanies }: Props) {
           >
             Atualizar
           </Button>
-          <Button className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10" icon="plus">
+          <Button className="shadow-brand-blue-500/10 h-9 px-4 text-xs font-bold shadow-md" icon="plus">
             Cadastrar
           </Button>
         </div>

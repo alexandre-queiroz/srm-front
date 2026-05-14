@@ -96,11 +96,11 @@ export default function Badge({
         variant !== "outline" && "border",
         sizes[size],
         activeVariant,
-        className
+        className,
       )}
     >
       {isLoading ? (
-        <Icon name="loader2" size={iconSizes[size]} stroke={2.5} className="animate-spin shrink-0" />
+        <Icon name="loader2" size={iconSizes[size]} stroke={2.5} className="shrink-0 animate-spin" />
       ) : dot ? (
         <span className={cn("shrink-0 rounded-full", dotSizes[size], activeDotColor)} />
       ) : null}

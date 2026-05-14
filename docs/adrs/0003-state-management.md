@@ -29,14 +29,14 @@ const load = (params) => {
 
 ## Trade-off
 
-| Critério | useState + useTransition | Zustand / Redux |
-|---|---|---|
-| Bundle size | Zero — primitivos do React | 3–50 KB adicionais |
-| Compartilhamento de estado entre rotas | Não necessário neste projeto | Seria o caso de uso principal |
-| Integração com Server Actions | Nativa — `startTransition(async ...)` | Requer middleware extra |
-| Loading states | `isPending` do `useTransition` | Boilerplate de status por slice |
-| Curva de aprendizado | Zero | Moderada |
-| Devtools | React DevTools | Redux DevTools |
+| Critério                               | useState + useTransition              | Zustand / Redux                 |
+| -------------------------------------- | ------------------------------------- | ------------------------------- |
+| Bundle size                            | Zero — primitivos do React            | 3–50 KB adicionais              |
+| Compartilhamento de estado entre rotas | Não necessário neste projeto          | Seria o caso de uso principal   |
+| Integração com Server Actions          | Nativa — `startTransition(async ...)` | Requer middleware extra         |
+| Loading states                         | `isPending` do `useTransition`        | Boilerplate de status por slice |
+| Curva de aprendizado                   | Zero                                  | Moderada                        |
+| Devtools                               | React DevTools                        | Redux DevTools                  |
 
 ## Justificativa
 
