@@ -1,4 +1,5 @@
 import { apiFetchJson } from "@/lib/api-client";
+import type { SettlementBatchReport } from "@/types";
 
 export interface SettlementReportItem {
   settled_at: string;
@@ -46,4 +47,24 @@ export async function getSettlementReport(
   if (params?.page_size) qs.set("page_size", String(params.page_size));
 
   return apiFetchJson<SettlementReportResponse>(`/v1/reports/settlements?${qs}`, {}, token);
+}
+
+export async function getSettlementBatchReport(
+  token: string,
+  params?: {
+    page?: number;
+    page_size?: number;
+    start_date?: string;
+    end_date?: string;
+    assignor_id?: string;
+  },
+): Promise<SettlementBatchReport> {
+  const qs = new URLSearchParams();
+  if (params?.page) qs.set("page", String(params.page));
+  if (params?.page_size) qs.set("page_size", String(params.page_size));
+  if (params?.start_date) qs.set("start_date", params.start_date);
+  if (params?.end_date) qs.set("end_date", params.end_date);
+  if (params?.assignor_id) qs.set("assignor_id", params.assignor_id);
+
+  return apiFetchJson<SettlementBatchReport>(`/v1/reports/settlements/by-batch?${qs}`, {}, token);
 }

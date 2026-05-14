@@ -167,3 +167,51 @@ export interface DashboardData {
   top_assignors: TopAssignor[];
   recent_batches: RecentBatch[];
 }
+
+export interface SettlementTransactionItem {
+  transaction_id: string;
+  invoice_key: string;
+  installment_number: string;
+  drawee_name: string;
+  drawee_cnpj: string;
+  instrument_currency: string;
+  face_value: string;
+  face_value_brl: string;
+  present_value: string;
+  exchange_rate_used: string | null;
+  term_days: number;
+  spread_used: string;
+  base_rate_used: string;
+  liquidated_at: string;
+}
+
+export interface SettlementBatchItem {
+  batch_id: string;
+  assignor_name: string;
+  assignor_cnpj: string;
+  processed_at: string;
+  total_receivables: number;
+  total_face_brl: string;
+  total_present_brl: string;
+  total_discount_brl: string;
+  avg_rate_pct: string;
+  transactions: SettlementTransactionItem[];
+}
+
+export interface SettlementBatchSummary {
+  total_batches: number;
+  total_receivables: number;
+  total_face_brl: string;
+  total_present_brl: string;
+  total_discount_brl: string;
+  avg_rate_pct: string;
+}
+
+export interface SettlementBatchReport {
+  items: SettlementBatchItem[];
+  summary: SettlementBatchSummary;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  total_batches: number;
+}
