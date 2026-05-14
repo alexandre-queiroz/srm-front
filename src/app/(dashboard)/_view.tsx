@@ -113,8 +113,8 @@ export default function DashboardView({ data }: DashboardViewProps) {
   });
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="max-w-[1600px] mx-auto space-y-4 pb-12">
+    <div className="h-full overflow-y-auto overflow-x-hidden">
+      <div className="max-w-[1600px] mx-auto space-y-4 pb-12 px-1">
         {/* Welcome Header */}
         <div className="flex items-end justify-between">
           <div>
