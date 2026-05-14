@@ -31,7 +31,11 @@ const columns = [
     id: "is_base",
     header: "Moeda Base",
     cell: ({ row }: { row: Currency }) =>
-      row.is_base ? <Badge color="success" size="sm">SIM</Badge> : null,
+      row.is_base ? (
+        <Badge color="success" size="sm">
+          SIM
+        </Badge>
+      ) : null,
   },
   {
     id: "is_active",
@@ -45,8 +49,7 @@ const columns = [
   {
     id: "created_at",
     header: "Cadastrado em",
-    cell: ({ row }: { row: Currency }) =>
-      new Date(row.created_at).toLocaleDateString("pt-BR"),
+    cell: ({ row }: { row: Currency }) => new Date(row.created_at).toLocaleDateString("pt-BR"),
   },
 ];
 
@@ -99,30 +102,22 @@ export function MoedasView({ initialData, fetchCurrencies, addCurrency }: Props)
       toast.success(`Moeda ${created.code} cadastrada com sucesso.`);
       setModalOpen(false);
       setForm({ code: "", name: "", symbol: "", is_base: false });
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao cadastrar moeda.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao cadastrar moeda.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-end justify-between shrink-0">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <h1 className="t-h3 !text-2xl text-fg-1 tracking-tight">Moedas</h1>
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex shrink-0 items-end justify-between">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <h1 className="t-h3 text-fg-1 !text-2xl tracking-tight">Moedas</h1>
           <p className="t-body !text-fg-3 mt-0.5">Moedas suportadas para emissão e liquidação de recebíveis.</p>
         </motion.div>
 
-        <Button
-          className="h-9 px-4 text-xs font-bold shadow-md shadow-brand-blue-500/10"
-          icon="plus"
-          onClick={() => setModalOpen(true)}
-        >
+        <Button className="shadow-brand-blue-500/10 h-9 px-4 text-xs font-bold shadow-md" icon="plus" onClick={() => setModalOpen(true)}>
           Cadastrar
         </Button>
       </div>
@@ -145,12 +140,12 @@ export function MoedasView({ initialData, fetchCurrencies, addCurrency }: Props)
             <ModalDescription>Adicione uma nova moeda ao sistema (ISO 4217).</ModalDescription>
           </ModalHeader>
 
-          <form onSubmit={handleSubmit} className="px-6 pb-2 space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 px-6 pb-2">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[13px] font-medium text-fg-1 mb-1.5 block">Código ISO</label>
+                <label className="text-fg-1 mb-1.5 block text-[13px] font-medium">Código ISO</label>
                 <input
-                  className="w-full border border-border-default rounded-xl px-3 py-2 text-sm font-mono uppercase bg-surface focus:outline-none focus:ring-2 focus:ring-brand-blue-300"
+                  className="border-border-default bg-surface focus:ring-brand-blue-300 w-full rounded-xl border px-3 py-2 font-mono text-sm uppercase focus:ring-2 focus:outline-none"
                   placeholder="BRL"
                   maxLength={3}
                   value={form.code}
@@ -159,9 +154,9 @@ export function MoedasView({ initialData, fetchCurrencies, addCurrency }: Props)
                 />
               </div>
               <div>
-                <label className="text-[13px] font-medium text-fg-1 mb-1.5 block">Símbolo</label>
+                <label className="text-fg-1 mb-1.5 block text-[13px] font-medium">Símbolo</label>
                 <input
-                  className="w-full border border-border-default rounded-xl px-3 py-2 text-sm font-mono bg-surface focus:outline-none focus:ring-2 focus:ring-brand-blue-300"
+                  className="border-border-default bg-surface focus:ring-brand-blue-300 w-full rounded-xl border px-3 py-2 font-mono text-sm focus:ring-2 focus:outline-none"
                   placeholder="R$"
                   maxLength={10}
                   value={form.symbol}
@@ -172,9 +167,9 @@ export function MoedasView({ initialData, fetchCurrencies, addCurrency }: Props)
             </div>
 
             <div>
-              <label className="text-[13px] font-medium text-fg-1 mb-1.5 block">Nome completo</label>
+              <label className="text-fg-1 mb-1.5 block text-[13px] font-medium">Nome completo</label>
               <input
-                className="w-full border border-border-default rounded-xl px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-brand-blue-300"
+                className="border-border-default bg-surface focus:ring-brand-blue-300 w-full rounded-xl border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
                 placeholder="Real Brasileiro"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -182,14 +177,14 @@ export function MoedasView({ initialData, fetchCurrencies, addCurrency }: Props)
               />
             </div>
 
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
                 className="rounded"
                 checked={form.is_base}
                 onChange={(e) => setForm((f) => ({ ...f, is_base: e.target.checked }))}
               />
-              <span className="text-sm text-fg-2">Moeda base (liquidação)</span>
+              <span className="text-fg-2 text-sm">Moeda base (liquidação)</span>
             </label>
 
             <ModalFooter className="-mx-6 mt-4">

@@ -27,7 +27,7 @@ export default function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const variantColorStyles: any = {
+  const variantColorStyles: Record<string, Record<string, string>> = {
     solid: {
       brand: "bg-brand-blue-500 text-white border border-transparent shadow-brand hover:bg-brand-blue-600 active:bg-brand-blue-700",
       accent:
@@ -40,21 +40,25 @@ export default function Button({
     outline: {
       brand: "bg-transparent text-brand-blue-500 border border-brand-blue-500 hover:bg-brand-blue-50 active:bg-brand-blue-100",
       accent: "bg-transparent text-brand-orange-500 border border-brand-orange-500 hover:bg-brand-orange-50 active:bg-brand-orange-100",
-      neutral: "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
+      neutral:
+        "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
       danger: "bg-transparent text-srm-danger-500 border border-srm-danger-500 hover:bg-srm-danger-50 active:bg-srm-danger-100",
       success: "bg-transparent text-srm-success-500 border border-srm-success-500 hover:bg-srm-success-50 active:bg-srm-success-100",
       warning: "bg-transparent text-srm-warning-500 border border-srm-warning-500 hover:bg-srm-warning-50 active:bg-srm-warning-100",
     },
     secondary: {
-      brand: "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
+      brand:
+        "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
       accent: "bg-transparent text-brand-orange-500 border border-brand-orange-500 hover:bg-brand-orange-50 active:bg-brand-orange-100",
-      neutral: "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
+      neutral:
+        "bg-white text-fg-1 border border-border-default shadow-xs hover:bg-surface-alt hover:border-border-strong active:bg-surface-sunken",
       danger: "bg-transparent text-srm-danger-500 border border-srm-danger-500 hover:bg-srm-danger-50 active:bg-srm-danger-100",
       success: "bg-transparent text-srm-success-500 border border-srm-success-500 hover:bg-srm-success-50 active:bg-srm-success-100",
       warning: "bg-transparent text-srm-warning-500 border border-srm-warning-500 hover:bg-srm-warning-50 active:bg-srm-warning-100",
     },
     ghost: {
-      brand: "bg-transparent text-brand-blue-500 border border-transparent hover:bg-brand-blue-50 hover:border-brand-blue-100 active:bg-brand-blue-100",
+      brand:
+        "bg-transparent text-brand-blue-500 border border-transparent hover:bg-brand-blue-50 hover:border-brand-blue-100 active:bg-brand-blue-100",
       accent:
         "bg-transparent text-brand-orange-500 border border-transparent hover:bg-brand-orange-50 hover:border-brand-orange-100 active:bg-brand-orange-100",
       neutral:
@@ -102,7 +106,7 @@ export default function Button({
     "hover:-translate-y-px active:translate-y-0",
     currentStyles,
     sizeStyles[size] || sizeStyles.md,
-    className
+    className,
   );
 
   const content = (
@@ -128,11 +132,7 @@ export default function Button({
   }
 
   return (
-    <button 
-      {...props} 
-      disabled={disabled || isLoading} 
-      className={buttonClasses}
-    >
+    <button {...props} disabled={disabled || isLoading} className={buttonClasses}>
       {content}
     </button>
   );

@@ -35,7 +35,7 @@ const operatorLabels: Record<FilterOperator, string> = {
   startswith: "Começa com",
   endswith: "Termina com",
   equal: "Igual",
-  different: "Diferente"
+  different: "Diferente",
 };
 
 const operatorIcons: Record<FilterOperator, string> = {
@@ -43,10 +43,20 @@ const operatorIcons: Record<FilterOperator, string> = {
   startswith: "alignLeft",
   endswith: "alignRight",
   equal: "equal",
-  different: "notEqual"
+  different: "notEqual",
 };
 
-function FilterInput({ columnId, label, filterType = "text", onFilterChange }: { columnId: string; label: string; filterType?: "text" | "number" | "enum" | "date"; onFilterChange: (id: string, val: string, op?: string) => void }) {
+function FilterInput({
+  columnId,
+  label,
+  filterType = "text",
+  onFilterChange,
+}: {
+  columnId: string;
+  label: string;
+  filterType?: "text" | "number" | "enum" | "date";
+  onFilterChange: (id: string, val: string, op?: string) => void;
+}) {
   const [value, setValue] = useState("");
   const [operator, setOperator] = useState<FilterOperator>("contains");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -77,7 +87,6 @@ function FilterInput({ columnId, label, filterType = "text", onFilterChange }: {
     }
   }, [isDropdownOpen]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     onFilterChange(columnId, debouncedValue, operator);
   }, [debouncedValue, operator, columnId]); // onFilterChange omitido intencionalmente — deve ser memoizado no pai com useCallback
@@ -97,47 +106,53 @@ function FilterInput({ columnId, label, filterType = "text", onFilterChange }: {
   };
 
   return (
-    <div className="relative font-normal w-full h-full">
-      <button 
+    <div className="relative h-full w-full font-normal">
+      <button
         ref={buttonRef}
         type="button"
         onClick={toggleDropdown}
-        className="absolute left-1.5 top-1/2 -translate-y-1/2 text-fg-3 hover:bg-surface-alt hover:text-fg-1 p-1 rounded transition-colors z-10 flex items-center gap-0.5 cursor-pointer"
+        className="text-fg-3 hover:bg-surface-alt hover:text-fg-1 absolute top-1/2 left-1.5 z-10 flex -translate-y-1/2 cursor-pointer items-center gap-0.5 rounded p-1 transition-colors"
         title={`Operador atual: ${operatorLabels[operator]}`}
       >
         <Icon name={operatorIcons[operator]} size={13} stroke={2.5} />
         <Icon name="chevronDown" size={10} stroke={2} className="opacity-50" />
       </button>
 
-      {isDropdownOpen && filterType === "text" && typeof window !== "undefined" && createPortal(
-        <div 
-          className="fixed min-w-[170px] bg-white border-[0.5px] border-border-subtle rounded-xl shadow-[0_4px_24px_-8px_rgba(0,0,0,0.12)] z-[9999] flex flex-col py-1.5"
-          style={{ top: dropdownPos.top, left: dropdownPos.left }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-           <div className="px-3 py-1.5 text-[10px] font-bold text-fg-3 uppercase tracking-wider">Operador de Busca</div>
-           {(Object.keys(operatorLabels) as FilterOperator[]).map(op => (
-             <button
-               key={op}
-               onClick={() => { setOperator(op); setIsDropdownOpen(false); }}
-               className={`text-left px-3 py-1.5 text-[13px] hover:bg-surface-alt transition-colors cursor-pointer flex items-center justify-between ${operator === op ? 'text-brand-blue-600 font-medium bg-surface-alt/50' : 'text-fg-2'}`}
-             >
-               <div className="flex items-center gap-2">
-                 <Icon name={operatorIcons[op]} size={14} stroke={2} className={operator === op ? "text-brand-blue-500" : "text-fg-3"} />
-                 {operatorLabels[op]}
-               </div>
-               {operator === op && <Icon name="check" size={12} stroke={2.5} />}
-             </button>
-           ))}
-        </div>,
-        document.body
-      )}
+      {isDropdownOpen &&
+        filterType === "text" &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <div
+            className="border-border-subtle fixed z-[9999] flex min-w-[170px] flex-col rounded-xl border-[0.5px] bg-white py-1.5 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.12)]"
+            style={{ top: dropdownPos.top, left: dropdownPos.left }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="text-fg-3 px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase">Operador de Busca</div>
+            {(Object.keys(operatorLabels) as FilterOperator[]).map((op) => (
+              <button
+                key={op}
+                onClick={() => {
+                  setOperator(op);
+                  setIsDropdownOpen(false);
+                }}
+                className={`hover:bg-surface-alt flex cursor-pointer items-center justify-between px-3 py-1.5 text-left text-[13px] transition-colors ${operator === op ? "text-brand-blue-600 bg-surface-alt/50 font-medium" : "text-fg-2"}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon name={operatorIcons[op]} size={14} stroke={2} className={operator === op ? "text-brand-blue-500" : "text-fg-3"} />
+                  {operatorLabels[op]}
+                </div>
+                {operator === op && <Icon name="check" size={12} stroke={2.5} />}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
 
       <input
         placeholder={`Filtrar...`}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="h-[34px] w-full bg-transparent pl-[52px] pr-4 text-[13px] text-fg-1 outline-none transition-colors placeholder:text-fg-disabled hover:bg-surface-alt/30 focus:bg-surface-alt/30 focus:shadow-[inset_0_-1.5px_0_0_var(--srm-blue-500)]"
+        className="text-fg-1 placeholder:text-fg-disabled hover:bg-surface-alt/30 focus:bg-surface-alt/30 h-[34px] w-full bg-transparent pr-4 pl-[52px] text-[13px] transition-colors outline-none focus:shadow-[inset_0_-1.5px_0_0_var(--srm-blue-500)]"
       />
     </div>
   );
@@ -162,29 +177,28 @@ export function DataTable<TData>({
   const filterableColumns = columns.filter((c) => c.enableColumnFilter);
 
   return (
-    <div className="flex flex-col flex-1 w-full min-h-0">
-      <div className="rounded-2xl border-[0.5px] border-border-default shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)] bg-white overflow-hidden flex flex-col flex-1 min-h-0">
-        
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="border-border-default flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border-[0.5px] bg-white shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)]">
         <div className="flex-1 overflow-auto">
           <Table className={minWidth}>
             <TableHeader className="sticky top-0 z-10 bg-white">
               <TableRow className="bg-surface-alt hover:bg-surface-alt border-b-border-subtle">
                 {columns.map((col) => (
-                  <TableHead key={col.id} className="align-middle py-3 px-5">
-                    <span className="text-[11.5px] uppercase tracking-wider text-fg-2 font-medium whitespace-nowrap">{col.header}</span>
+                  <TableHead key={col.id} className="px-5 py-3 align-middle">
+                    <span className="text-fg-2 text-[11.5px] font-medium tracking-wider whitespace-nowrap uppercase">{col.header}</span>
                   </TableHead>
                 ))}
               </TableRow>
               {filterableColumns.length > 0 && (
-                <TableRow className="bg-white hover:bg-white border-b-border-default">
+                <TableRow className="border-b-border-default bg-white hover:bg-white">
                   {columns.map((col) => (
-                    <TableHead key={`filter-${col.id}`} className="p-0 border-r-[0.5px] border-border-subtle last:border-r-0 h-[34px]">
+                    <TableHead key={`filter-${col.id}`} className="border-border-subtle h-[34px] border-r-[0.5px] p-0 last:border-r-0">
                       {col.enableColumnFilter ? (
-                        <FilterInput 
-                          columnId={col.id} 
-                          label={typeof col.header === "string" ? col.header : col.id} 
+                        <FilterInput
+                          columnId={col.id}
+                          label={typeof col.header === "string" ? col.header : col.id}
                           filterType={col.filterType}
-                          onFilterChange={onFilterChange} 
+                          onFilterChange={onFilterChange}
                         />
                       ) : null}
                     </TableHead>
@@ -195,7 +209,7 @@ export function DataTable<TData>({
             <TableBody>
               {data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center text-fg-3 text-sm">
+                  <TableCell colSpan={columns.length} className="text-fg-3 h-32 text-center text-sm">
                     Nenhum resultado encontrado.
                   </TableCell>
                 </TableRow>
@@ -207,8 +221,8 @@ export function DataTable<TData>({
                     className={onRowClick ? "cursor-pointer" : undefined}
                   >
                     {columns.map((col) => (
-                      <TableCell key={col.id} className="px-5 py-4 text-[13px] text-fg-1 whitespace-nowrap">
-                        {col.cell ? col.cell({ row }) : (row as any)[col.id]}
+                      <TableCell key={col.id} className="text-fg-1 px-5 py-4 text-[13px] whitespace-nowrap">
+                        {col.cell ? col.cell({ row }) : String((row as Record<string, unknown>)[col.id] ?? "")}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -219,43 +233,43 @@ export function DataTable<TData>({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-1 pt-5 shrink-0">
-        <div className="text-[13px] text-fg-3 flex items-center gap-4">
+      <div className="flex shrink-0 flex-col items-center justify-between gap-6 px-1 pt-5 sm:flex-row">
+        <div className="text-fg-3 flex items-center gap-4 text-[13px]">
           <div>
-            Mostrando <span className="font-medium text-fg-1">{startItem}</span> até{" "}
-            <span className="font-medium text-fg-1">{endItem}</span> de{" "}
-            <span className="font-medium text-fg-1">{totalItems}</span> registros
+            Mostrando <span className="text-fg-1 font-medium">{startItem}</span> até{" "}
+            <span className="text-fg-1 font-medium">{endItem}</span> de <span className="text-fg-1 font-medium">{totalItems}</span>{" "}
+            registros
           </div>
-          <div className="h-4 w-px bg-border-default hidden sm:block"></div>
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="text-[13px] text-fg-3 whitespace-nowrap">Linhas por página:</span>
+          <div className="bg-border-default hidden h-4 w-px sm:block"></div>
+          <div className="hidden items-center gap-2 sm:flex">
+            <span className="text-fg-3 text-[13px] whitespace-nowrap">Linhas por página:</span>
             <div className="relative">
               <select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="h-8 appearance-none rounded-full border-[0.5px] border-border-default bg-white pl-3 pr-8 text-[13px] text-fg-1 font-medium outline-none transition-colors hover:border-border-strong focus:border-brand-blue-500 cursor-pointer shadow-xs"
+                className="border-border-default text-fg-1 hover:border-border-strong focus:border-brand-blue-500 h-8 cursor-pointer appearance-none rounded-full border-[0.5px] bg-white pr-8 pl-3 text-[13px] font-medium shadow-xs transition-colors outline-none"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <Icon name="chevronDown" size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-3 pointer-events-none" />
+              <Icon name="chevronDown" size={14} className="text-fg-3 pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2" />
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             color="neutral"
             onClick={() => onPageChange(pageIndex - 1)}
             disabled={pageIndex === 0}
-            className="h-8 w-8 p-0 min-w-0 rounded-full"
+            className="h-8 w-8 min-w-0 rounded-full p-0"
           >
             <Icon name="arrowLeft" size={14} />
           </Button>
-          <div className="text-[13px] font-medium text-fg-1 px-3">
+          <div className="text-fg-1 px-3 text-[13px] font-medium">
             Página {pageIndex + 1} de {pageCount}
           </div>
           <Button
@@ -263,7 +277,7 @@ export function DataTable<TData>({
             color="neutral"
             onClick={() => onPageChange(pageIndex + 1)}
             disabled={pageIndex >= pageCount - 1}
-            className="h-8 w-8 p-0 min-w-0 rounded-full"
+            className="h-8 w-8 min-w-0 rounded-full p-0"
           >
             <Icon name="arrowRight" size={14} />
           </Button>
