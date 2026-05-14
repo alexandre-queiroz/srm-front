@@ -10,9 +10,8 @@ Este é o frontend da plataforma de antecipação de recebíveis da **SRM Asset*
 - **Linguagem:** TypeScript
 - **Estilização:** Tailwind CSS + Vanilla CSS (Design Tokens)
 - **Animações:** Framer Motion
-- **Componentes de UI:** Radix UI (Primitives) + Design System customizado
+- **Componentes de UI:** Design System customizado (componentes nativos React + Framer Motion)
 - **Gerenciamento de Estado:** Server Actions + React `useTransition`
-- **Validação:** Zod
 - **Ícones:** Lucide React (via componente `Icon` abstraído)
 - **Feedback:** Sonner (Toasts)
 
@@ -50,7 +49,7 @@ A comunicação com o backend é feita majoritariamente via **Server Actions**. 
 Diferente da versão inicial, a simulação de antecipação agora é **stateless**. O frontend envia os IDs dos títulos e o backend calcula o deságio sem persistir um lote no banco até que o usuário confirme a operação.
 
 ### 4. Design System SRM
-Localizado em `design-system-src/`, o sistema de design foca em:
+Documentado em `src/app/docs/` (rota `/docs` da aplicação), o sistema de design foca em:
 - **Tabular Numerals:** Obrigatório para todos os valores financeiros para garantir alinhamento vertical perfeito.
 - **Hierarquia Visual:** Branco como protagonista, com azul e laranja SRM apenas como acentos.
 - **Micro-interações:** Feedback imediato em todas as ações via `framer-motion` e estados de `loading` nos botões.
@@ -87,7 +86,7 @@ Acesse `http://localhost:3000`.
 - [x] Integração completa com API de Câmbio.
 - [x] Motor de relatórios analíticos funcional.
 - [x] Simulador sem persistência precoce.
-- [ ] Dashboards dinâmicos na Home (atualmente parciais).
+- [x] Dashboards dinâmicos na Home.
 - [ ] Testes E2E com Playwright para o fluxo de antecipação.
 
 ---
