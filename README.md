@@ -40,16 +40,21 @@ src/
 ## 🛠️ Arquitetura e Decisões Técnicas
 
 ### 1. Camada de Repositórios
+
 Utilizamos o padrão **Repository Pattern** para isolar as chamadas de API. Isso permite que as páginas e componentes não saibam detalhes de implementação da rede (endpoints, headers de auth, etc.).
 
 ### 2. Server Actions & Segurança
+
 A comunicação com o backend é feita majoritariamente via **Server Actions**. Isso elimina a exposição da URL do backend no client-side e permite uma gestão de cookies/tokens mais segura (`httpOnly`).
 
 ### 3. Simulação Stateless
+
 Diferente da versão inicial, a simulação de antecipação agora é **stateless**. O frontend envia os IDs dos títulos e o backend calcula o deságio sem persistir um lote no banco até que o usuário confirme a operação.
 
 ### 4. Design System SRM
+
 Documentado em `src/app/docs/` (rota `/docs` da aplicação), o sistema de design foca em:
+
 - **Tabular Numerals:** Obrigatório para todos os valores financeiros para garantir alinhamento vertical perfeito.
 - **Hierarquia Visual:** Branco como protagonista, com azul e laranja SRM apenas como acentos.
 - **Micro-interações:** Feedback imediato em todas as ações via `framer-motion` e estados de `loading` nos botões.
@@ -59,10 +64,12 @@ Documentado em `src/app/docs/` (rota `/docs` da aplicação), o sistema de desig
 ## ⚙️ Configuração Local
 
 ### Pré-requisitos
+
 - Node.js 20+
 - NPM ou PNPM
 
 ### Instalação
+
 1. Clone o repositório.
 2. Instale as dependências:
    ```bash
@@ -74,9 +81,11 @@ Documentado em `src/app/docs/` (rota `/docs` da aplicação), o sistema de desig
    ```
 
 ### Execução
+
 ```bash
 npm run dev
 ```
+
 Acesse `http://localhost:3000`.
 
 ---

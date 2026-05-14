@@ -16,13 +16,7 @@ interface CookieOptions {
 }
 
 export function setCookie(name: string, value: string, options: CookieOptions = {}) {
-  const {
-    expires,
-    path = "/",
-    domain,
-    secure = true,
-    sameSite = "Lax",
-  } = options;
+  const { expires, path = "/", domain, secure = true, sameSite = "Lax" } = options;
 
   let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
 

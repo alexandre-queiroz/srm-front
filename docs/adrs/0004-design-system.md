@@ -19,14 +19,14 @@ Componentes base (`Button`, `Badge`, `Modal`, `DataTable`, `Avatar`, `Icon`, `Se
 
 ## Trade-off
 
-| Critério | Componentes nativos | shadcn/ui ou Radix |
-|---|---|---|
-| Alinhamento com identidade SRM | Total controle de markup e aparência | Requer sobrescrita sistemática |
-| Comportamentos complexos (modal, select) | Implementados do zero | Prontos e testados |
-| Acessibilidade | Requer atenção manual | Garantida pela lib |
-| Bundle size | Apenas o que é usado | Apenas o que é instalado |
-| Acoplamento externo | Zero | API da lib pode quebrar ao atualizar |
-| Tabular numerals em tabelas | Configurado por padrão | Requer customização |
+| Critério                                 | Componentes nativos                  | shadcn/ui ou Radix                   |
+| ---------------------------------------- | ------------------------------------ | ------------------------------------ |
+| Alinhamento com identidade SRM           | Total controle de markup e aparência | Requer sobrescrita sistemática       |
+| Comportamentos complexos (modal, select) | Implementados do zero                | Prontos e testados                   |
+| Acessibilidade                           | Requer atenção manual                | Garantida pela lib                   |
+| Bundle size                              | Apenas o que é usado                 | Apenas o que é instalado             |
+| Acoplamento externo                      | Zero                                 | API da lib pode quebrar ao atualizar |
+| Tabular numerals em tabelas              | Configurado por padrão               | Requer customização                  |
 
 ## Justificativa
 

@@ -42,24 +42,18 @@ export default function Input({
   return (
     <div className={`flex w-full flex-col ${className}`}>
       {/* Container fixo para o label não mudar a altura do bloco */}
-      <div className="min-h-[20px] mb-1">
-        {label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}
-      </div>
+      <div className="mb-1 min-h-[20px]">{label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}</div>
 
       <div
         className={cn(
-          "flex items-stretch overflow-hidden rounded-full transition-colors duration-200 h-10",
+          "flex h-10 items-stretch overflow-hidden rounded-full transition-colors duration-200",
           disabled ? "bg-surface-sunken cursor-not-allowed opacity-60" : "bg-white",
-          borderClass
+          borderClass,
         )}
       >
-        {prefixAddon && (
-          <div className="text-fg-3 flex items-center pl-4 pr-1.5 text-[13px] select-none">
-            {prefixAddon}
-          </div>
-        )}
+        {prefixAddon && <div className="text-fg-3 flex items-center pr-1.5 pl-4 text-[13px] select-none">{prefixAddon}</div>}
         {icon && !prefixAddon && (
-          <div className="text-fg-3 flex items-center pl-4 pr-1.5 select-none">
+          <div className="text-fg-3 flex items-center pr-1.5 pl-4 select-none">
             <Icon name={icon} size={15} stroke={2} />
           </div>
         )}
@@ -70,16 +64,12 @@ export default function Input({
           className={cn(
             "text-fg-1 placeholder:text-fg-disabled flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed",
             props.type === "number" && "t-num",
-            (icon || prefixAddon) ? "pl-1.5" : "pl-4",
-            (iconRight || suffixAddon) ? "pr-1.5" : "pr-4"
+            icon || prefixAddon ? "pl-1.5" : "pl-4",
+            iconRight || suffixAddon ? "pr-1.5" : "pr-4",
           )}
         />
 
-        {suffixAddon && (
-          <div className="text-fg-3 flex items-center pr-4 pl-1.5 text-[13px] select-none">
-            {suffixAddon}
-          </div>
-        )}
+        {suffixAddon && <div className="text-fg-3 flex items-center pr-4 pl-1.5 text-[13px] select-none">{suffixAddon}</div>}
         {iconRight && !suffixAddon && (
           <div className="text-fg-3 flex items-center pr-4 pl-1.5 select-none">
             <Icon name={iconRight} size={15} stroke={2} />
@@ -87,7 +77,7 @@ export default function Input({
         )}
       </div>
 
-      <div className="min-h-[18px] mt-1">
+      <div className="mt-1 min-h-[18px]">
         {error ? (
           <div className="text-srm-danger-600 flex items-center gap-1 text-[11.5px] font-medium">
             <Icon name="alertCircle" size={12} stroke={2} />

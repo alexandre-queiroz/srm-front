@@ -21,14 +21,14 @@ O token JWT é armazenado em cookie `httpOnly` e lido apenas no contexto do serv
 
 ## Trade-off
 
-| Critério | Server Actions | Client-side fetch |
-|---|---|---|
-| Exposição do token | Nunca chega ao navegador | Token em memória JS ou cookie acessível |
-| URL do backend | Nunca exposta ao client | Visível no DevTools/Network |
-| XSS | Token inacessível mesmo com script injetado | Token roubável via `document.cookie` ou memória |
-| Tipagem end-to-end | Tipos compartilhados diretamente | Requer duplicação ou codegen |
-| Complexidade | Baixa — funções async marcadas com `"use server"` | Requer gerenciamento de estado no client |
-| Streaming/loading | `useTransition` + `isPending` | `useState` + `useEffect` |
+| Critério           | Server Actions                                    | Client-side fetch                               |
+| ------------------ | ------------------------------------------------- | ----------------------------------------------- |
+| Exposição do token | Nunca chega ao navegador                          | Token em memória JS ou cookie acessível         |
+| URL do backend     | Nunca exposta ao client                           | Visível no DevTools/Network                     |
+| XSS                | Token inacessível mesmo com script injetado       | Token roubável via `document.cookie` ou memória |
+| Tipagem end-to-end | Tipos compartilhados diretamente                  | Requer duplicação ou codegen                    |
+| Complexidade       | Baixa — funções async marcadas com `"use server"` | Requer gerenciamento de estado no client        |
+| Streaming/loading  | `useTransition` + `isPending`                     | `useState` + `useEffect`                        |
 
 ## Justificativa
 

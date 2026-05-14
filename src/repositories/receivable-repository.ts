@@ -10,7 +10,7 @@ export async function listReceivables(
     invoice_key?: string;
     invoice_key_op?: string;
     page?: number;
-    page_size?: number
+    page_size?: number;
   },
 ): Promise<Page<Receivable>> {
   const qs = new URLSearchParams();
@@ -27,13 +27,13 @@ export async function listReceivables(
 
 export async function listReceivablesCursor(
   token: string,
-  params?: { 
-    assignor_id?: string; 
+  params?: {
+    assignor_id?: string;
     drawee_id?: string;
     status?: string;
     invoice_key?: string;
-    after?: string; 
-    page_size?: number 
+    after?: string;
+    page_size?: number;
   },
 ): Promise<CursorPage<Receivable>> {
   const qs = new URLSearchParams();
@@ -59,10 +59,11 @@ export async function uploadReceivableXml(
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await apiFetch(
-    `/v1/receivables/upload?${qs}`,
-    { method: "POST", body: formData, headers: { Authorization: `Bearer ${token}` } },
-  );
+  const res = await apiFetch(`/v1/receivables/upload?${qs}`, {
+    method: "POST",
+    body: formData,
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));

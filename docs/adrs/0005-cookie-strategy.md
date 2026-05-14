@@ -11,10 +11,10 @@ O sistema usa dois tipos de dados persistidos no navegador: o token JWT de auten
 
 Dois cookies com flags distintas:
 
-| Cookie | Flag httpOnly | Conteúdo | Quem lê |
-|---|---|---|---|
-| `srm_token` | `true` | JWT de autenticação | Somente Server Actions |
-| `srm_user` | `false` | `{ name, id }` JSON | Layout client-side (uma vez no mount) |
+| Cookie      | Flag httpOnly | Conteúdo            | Quem lê                               |
+| ----------- | ------------- | ------------------- | ------------------------------------- |
+| `srm_token` | `true`        | JWT de autenticação | Somente Server Actions                |
+| `srm_user`  | `false`       | `{ name, id }` JSON | Layout client-side (uma vez no mount) |
 
 O cookie `srm_user` é escrito pelo servidor durante o login (Server Action tem acesso ao token para chamar `/me`) e lido no client-side via `document.cookie` no `useEffect` do layout. Não há polling da API — a leitura acontece uma única vez.
 
@@ -26,12 +26,12 @@ O cookie `srm_user` é escrito pelo servidor durante o login (Server Action tem 
 
 ## Trade-off
 
-| Critério | Dois cookies | Cookie único httpOnly | Polling `/me` |
-|---|---|---|---|
-| Segurança do token | Total (nunca acessível ao JS) | Total | Expõe token no client |
-| Exibição do nome | Sem custo de rede | Requer Server Action no layout | Uma req por navegação |
-| Implementação | Levemente mais complexa | Simples | Simples mas ineficiente |
-| Staleness do nome | Possível (nome muda, cookie não) | N/A | Sempre fresco |
+| Critério           | Dois cookies                     | Cookie único httpOnly          | Polling `/me`           |
+| ------------------ | -------------------------------- | ------------------------------ | ----------------------- |
+| Segurança do token | Total (nunca acessível ao JS)    | Total                          | Expõe token no client   |
+| Exibição do nome   | Sem custo de rede                | Requer Server Action no layout | Uma req por navegação   |
+| Implementação      | Levemente mais complexa          | Simples                        | Simples mas ineficiente |
+| Staleness do nome  | Possível (nome muda, cookie não) | N/A                            | Sempre fresco           |
 
 ## Justificativa
 

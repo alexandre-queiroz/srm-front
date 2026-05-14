@@ -35,29 +35,15 @@ export async function previewBatch(token: string, batchId: string): Promise<Batc
   return apiFetchJson<BatchPreview>(`/v1/batches/${batchId}/preview`, {}, token);
 }
 
-export async function simulateBatch(
-  token: string,
-  payload: { assignor_id: string; receivable_ids: string[] },
-): Promise<BatchPreview> {
-  return apiFetchJson<BatchPreview>(
-    `/v1/batches/simulate`,
-    { method: "POST", body: JSON.stringify(payload) },
-    token,
-  );
+export async function simulateBatch(token: string, payload: { assignor_id: string; receivable_ids: string[] }): Promise<BatchPreview> {
+  return apiFetchJson<BatchPreview>(`/v1/batches/simulate`, { method: "POST", body: JSON.stringify(payload) }, token);
 }
 
-export async function createBatch(
-  token: string,
-  payload: { assignor_id: string; receivable_ids: string[] },
-): Promise<Batch> {
+export async function createBatch(token: string, payload: { assignor_id: string; receivable_ids: string[] }): Promise<Batch> {
   return apiFetchJson<Batch>(`/v1/batches`, { method: "POST", body: JSON.stringify(payload) }, token);
 }
 
-export async function confirmBatch(
-  token: string,
-  batchId: string,
-  expectedVersion: number,
-): Promise<Batch> {
+export async function confirmBatch(token: string, batchId: string, expectedVersion: number): Promise<Batch> {
   return apiFetchJson<Batch>(
     `/v1/batches/${batchId}/confirm`,
     { method: "POST", body: JSON.stringify({ expected_version: expectedVersion }) },
@@ -65,11 +51,7 @@ export async function confirmBatch(
   );
 }
 
-export async function queueBatch(
-  token: string,
-  batchId: string,
-  expectedVersion: number,
-): Promise<Batch> {
+export async function queueBatch(token: string, batchId: string, expectedVersion: number): Promise<Batch> {
   return apiFetchJson<Batch>(
     `/v1/batches/${batchId}/queue`,
     { method: "POST", body: JSON.stringify({ expected_version: expectedVersion }) },

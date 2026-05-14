@@ -22,11 +22,7 @@ export class ApiResponseError extends Error {
   }
 }
 
-export async function apiFetch(
-  path: string,
-  options: RequestInit = {},
-  token?: string,
-): Promise<Response> {
+export async function apiFetch(path: string, options: RequestInit = {}, token?: string): Promise<Response> {
   const url = resolveApiUrl(path);
 
   const headers: Record<string, string> = {
@@ -42,11 +38,7 @@ export async function apiFetch(
   return fetch(url, { ...options, headers });
 }
 
-export async function apiFetchJson<T>(
-  path: string,
-  options: RequestInit = {},
-  token?: string,
-): Promise<T> {
+export async function apiFetchJson<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const res = await apiFetch(path, options, token);
 
   if (!res.ok) {

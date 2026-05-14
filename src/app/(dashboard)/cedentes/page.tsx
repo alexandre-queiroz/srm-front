@@ -20,10 +20,5 @@ async function fetchCompanies(params?: {
 export default async function CedentesPage() {
   const initialData = await safeCall(() => fetchCompanies(), [] as Company[]);
 
-  return (
-    <CedentesView
-      initialData={initialData}
-      fetchCompanies={fetchCompanies}
-    />
-  );
+  return <CedentesView initialData={initialData} fetchCompanies={fetchCompanies} />;
 }

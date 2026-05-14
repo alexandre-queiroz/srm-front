@@ -15,20 +15,20 @@ interface TabsContextValue {
 
 const TabsContext = createContext<TabsContextValue | undefined>(undefined);
 
-export function Tabs({ 
-  defaultValue, 
-  value, 
-  onValueChange, 
+export function Tabs({
+  defaultValue,
+  value,
+  onValueChange,
   color = "brand",
-  className, 
-  children 
-}: { 
-  defaultValue?: string, 
-  value?: string, 
-  onValueChange?: (val: string) => void, 
-  color?: SemanticColor,
-  className?: string, 
-  children: React.ReactNode 
+  className,
+  children,
+}: {
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (val: string) => void;
+  color?: SemanticColor;
+  className?: string;
+  children: React.ReactNode;
 }) {
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue || "");
   const currentValue = value !== undefined ? value : uncontrolledValue;
@@ -37,20 +37,35 @@ export function Tabs({
 
   return (
     <TabsContext.Provider value={{ value: currentValue, onValueChange: setValue, color, layoutId }}>
-      <div className={cn("flex flex-col w-full", className)}>{children}</div>
+      <div className={cn("flex w-full flex-col", className)}>{children}</div>
     </TabsContext.Provider>
   );
 }
 
-export function TabsList({ className, children }: { className?: string, children: React.ReactNode }) {
+export function TabsList({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div className={cn("inline-flex h-11 items-center justify-center rounded-full bg-surface-alt p-1 text-fg-3 border-[0.5px] border-border-default shadow-inner relative overflow-hidden", className)}>
+    <div
+      className={cn(
+        "bg-surface-alt text-fg-3 border-border-default relative inline-flex h-11 items-center justify-center overflow-hidden rounded-full border-[0.5px] p-1 shadow-inner",
+        className,
+      )}
+    >
       {children}
     </div>
   );
 }
 
-export function TabsTrigger({ value, className, children, disabled }: { value: string, className?: string, children: React.ReactNode, disabled?: boolean }) {
+export function TabsTrigger({
+  value,
+  className,
+  children,
+  disabled,
+}: {
+  value: string;
+  className?: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+}) {
   const context = useContext(TabsContext);
   if (!context) throw new Error("TabsTrigger must be used within Tabs");
 
@@ -80,35 +95,38 @@ export function TabsTrigger({ value, className, children, disabled }: { value: s
       disabled={disabled}
       onClick={() => context.onValueChange(value)}
       className={cn(
-        "relative flex h-full items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        "relative flex h-full cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         isSelected ? colorStyles[context.color] : "text-fg-3 hover:text-fg-1 hover:bg-surface-sunken/50",
         ringStyles[context.color],
-        className
+        className,
       )}
     >
       {isSelected && (
         <motion.div
           layoutId={context.layoutId}
-          className="absolute inset-0 z-0 rounded-full bg-white shadow-xs border-[0.5px] border-border-default"
+          className="border-border-default absolute inset-0 z-0 rounded-full border-[0.5px] bg-white shadow-xs"
           initial={false}
           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
         />
       )}
-      <span className="relative z-10 flex items-center gap-2">
-        {children}
-      </span>
+      <span className="relative z-10 flex items-center gap-2">{children}</span>
     </button>
   );
 }
 
-export function TabsContent({ value, className, children }: { value: string, className?: string, children: React.ReactNode }) {
+export function TabsContent({ value, className, children }: { value: string; className?: string; children: React.ReactNode }) {
   const context = useContext(TabsContext);
   if (!context) throw new Error("TabsContent must be used within Tabs");
 
   if (context.value !== value) return null;
 
   return (
-    <div className={cn("mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue-500 focus-visible:ring-offset-2", className)}>
+    <div
+      className={cn(
+        "focus-visible:ring-brand-blue-500 mt-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        className,
+      )}
+    >
       {children}
     </div>
   );

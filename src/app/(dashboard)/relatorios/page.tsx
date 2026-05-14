@@ -34,16 +34,7 @@ async function fetchCompanies(social_reason?: string): Promise<Company[]> {
 }
 
 export default async function RelatoriosPage() {
-  const initialData = await safeCall(
-    () => fetchReport({ page: 1, page_size: 20 }),
-    EMPTY_FALLBACK,
-  );
+  const initialData = await safeCall(() => fetchReport({ page: 1, page_size: 20 }), EMPTY_FALLBACK);
 
-  return (
-    <RelatoriosView
-      initialData={initialData}
-      fetchReport={fetchReport}
-      fetchCompanies={fetchCompanies}
-    />
-  );
+  return <RelatoriosView initialData={initialData} fetchReport={fetchReport} fetchCompanies={fetchCompanies} />;
 }

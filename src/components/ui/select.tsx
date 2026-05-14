@@ -94,9 +94,7 @@ export default function Select({
 
   return (
     <div className={`flex w-full flex-col ${className}`} ref={containerRef}>
-      <div className="mb-1 min-h-[20px]">
-        {label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}
-      </div>
+      <div className="mb-1 min-h-[20px]">{label && <label className="text-fg-1 text-[13px] font-medium">{label}</label>}</div>
 
       <div className="relative">
         <button
@@ -110,45 +108,53 @@ export default function Select({
             borderClass,
           )}
         >
-          <div className="flex items-center truncate min-w-0">
-            {icon && <Icon name={icon} size={15} stroke={2} className="mr-2 shrink-0 text-fg-3" />}
+          <div className="flex min-w-0 items-center truncate">
+            {icon && <Icon name={icon} size={15} stroke={2} className="text-fg-3 mr-2 shrink-0" />}
             <span className={cn("truncate text-sm", !selectedOption && "text-fg-disabled")}>
               {selectedOption ? selectedOption.label : placeholder}
             </span>
           </div>
-          <Icon name="chevronDown" size={15} stroke={2} className={cn("text-fg-3 shrink-0 ml-2 transition-transform", isOpen && "rotate-180")} />
+          <Icon
+            name="chevronDown"
+            size={15}
+            stroke={2}
+            className={cn("text-fg-3 ml-2 shrink-0 transition-transform", isOpen && "rotate-180")}
+          />
         </button>
       </div>
 
-      {isOpen && !disabled && typeof window !== "undefined" && createPortal(
-        <div
-          className="fixed z-[9999] max-h-60 overflow-auto overflow-x-hidden rounded-2xl border-[0.5px] border-border-subtle bg-white shadow-lg flex flex-col"
-          style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          {options.length === 0 ? (
-            <div className="text-fg-3 px-4 py-3 text-sm">Nenhuma opção</div>
-          ) : (
-            options.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={cn(
-                  "hover:bg-surface-alt w-full px-4 py-2.5 text-left text-sm transition-colors",
-                  value === opt.value ? "bg-surface-alt text-brand-blue-600 font-medium" : "text-fg-1",
-                )}
-                onClick={() => {
-                  onChange?.(opt.value);
-                  setIsOpen(false);
-                }}
-              >
-                {opt.label}
-              </button>
-            ))
-          )}
-        </div>,
-        document.body,
-      )}
+      {isOpen &&
+        !disabled &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <div
+            className="border-border-subtle fixed z-[9999] flex max-h-60 flex-col overflow-auto overflow-x-hidden rounded-2xl border-[0.5px] bg-white shadow-lg"
+            style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            {options.length === 0 ? (
+              <div className="text-fg-3 px-4 py-3 text-sm">Nenhuma opção</div>
+            ) : (
+              options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={cn(
+                    "hover:bg-surface-alt w-full px-4 py-2.5 text-left text-sm transition-colors",
+                    value === opt.value ? "bg-surface-alt text-brand-blue-600 font-medium" : "text-fg-1",
+                  )}
+                  onClick={() => {
+                    onChange?.(opt.value);
+                    setIsOpen(false);
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))
+            )}
+          </div>,
+          document.body,
+        )}
 
       <div className="mt-1 min-h-[18px]">
         {error ? (
