@@ -18,7 +18,7 @@ export default function Home() {
         </header>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Link href="/gallery" className="group block">
+          <Link href="/docs/gallery" className="group block">
             <Card className="group-hover:border-brand-blue h-full cursor-pointer border-2 border-transparent transition-all">
               <Icon name="file" className="text-brand-blue mb-4" size={32} />
               <h2 className="t-h3 mb-2">Galeria de UI</h2>
@@ -26,7 +26,7 @@ export default function Home() {
             </Card>
           </Link>
 
-          <Link href="/colors" className="group block">
+          <Link href="/docs/colors" className="group block">
             <Card className="group-hover:border-brand-orange h-full cursor-pointer border-2 border-transparent transition-all">
               <Icon name="chart" className="text-brand-orange mb-4" size={32} />
               <h2 className="t-h3 mb-2">Design Tokens</h2>
@@ -36,7 +36,7 @@ export default function Home() {
         </div>
 
         <footer className="pt-8">
-          <Link href="/gallery">
+          <Link href="/docs/gallery">
             <Button variant="outline" color="neutral" iconRight="arrowRight">
               Ver Componentes
             </Button>
